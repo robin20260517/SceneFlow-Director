@@ -1,0 +1,902 @@
+/* ============================================
+   运镜动画图标 — 纯CSS运动演示
+   每个小方块演示镜头/主体的运动方向和原理
+   ============================================ */
+
+.mi {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.mi-scene {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 主体（被摄物）：小方块 */
+.mi-subject {
+    width: 12px;
+    height: 12px;
+    background: var(--duo-green);
+    border-radius: 2px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 摄像机：三角形 */
+.mi-cam {
+    width: 0;
+    height: 0;
+    border-left: 6px solid var(--duo-blue);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    position: absolute;
+}
+
+/* ===== 推 Push ===== */
+.mi-push .mi-cam {
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
+    animation: mi-push-move 2.5s infinite ease-in-out;
+}
+@keyframes mi-push-move {
+    0%, 100% { bottom: 8px; }
+    50% { bottom: 32px; }
+}
+
+/* ===== 拉 Pull ===== */
+.mi-pull .mi-cam {
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+    animation: mi-pull-move 2.5s infinite ease-in-out;
+}
+@keyframes mi-pull-move {
+    0%, 100% { bottom: 32px; }
+    50% { bottom: 6px; }
+}
+
+/* ===== 摇 Pan ===== */
+.mi-pan .mi-cam {
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: mi-pan-rot 3s infinite ease-in-out;
+}
+.mi-pan .mi-subject { left: 25%; }
+.mi-pan .s2 { left: 75%; background: var(--duo-orange); }
+@keyframes mi-pan-rot {
+    0%, 100% { transform: translateX(-50%) rotate(-30deg); }
+    50% { transform: translateX(-50%) rotate(30deg); }
+}
+
+/* ===== 移 Track ===== */
+.mi-track .mi-cam {
+    bottom: 6px;
+    left: 10px;
+    transform: rotate(-90deg);
+    animation: mi-track-move 3s infinite ease-in-out;
+}
+@keyframes mi-track-move {
+    0%, 100% { left: 10px; }
+    50% { left: 44px; }
+}
+
+/* ===== 跟 Follow ===== */
+.mi-follow .mi-subject {
+    animation: mi-follow-subj 3s infinite ease-in-out;
+}
+.mi-follow .mi-cam {
+    bottom: 50%;
+    left: 8px;
+    transform: translateY(50%);
+    animation: mi-follow-cam 3s infinite ease-in-out;
+}
+@keyframes mi-follow-subj {
+    0%, 100% { left: 30%; }
+    50% { left: 65%; }
+}
+@keyframes mi-follow-cam {
+    0%, 100% { left: 8px; }
+    50% { left: 36px; }
+}
+
+/* ===== 升 Up ===== */
+.mi-up .mi-cam {
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%) rotate(-90deg);
+    animation: mi-up-move 2.5s infinite ease-in-out;
+}
+@keyframes mi-up-move {
+    0%, 100% { bottom: 8px; }
+    50% { bottom: 44px; }
+}
+
+/* ===== 降 Down ===== */
+.mi-down .mi-cam {
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%) rotate(90deg);
+    animation: mi-down-move 2.5s infinite ease-in-out;
+}
+@keyframes mi-down-move {
+    0%, 100% { top: 8px; }
+    50% { top: 44px; }
+}
+
+/* ===== 甩 Whip ===== */
+.mi-whip .mi-cam {
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: mi-whip-rot 1.5s infinite;
+}
+.mi-whip .mi-blur {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 30%, rgba(88,204,2,0.2) 50%, transparent 70%);
+    animation: mi-whip-blur 1.5s infinite;
+    opacity: 0;
+}
+@keyframes mi-whip-rot {
+    0%, 80%, 100% { transform: translateX(-50%) rotate(0); }
+    85% { transform: translateX(-50%) rotate(90deg); }
+}
+@keyframes mi-whip-blur {
+    0%, 80%, 100% { opacity: 0; }
+    85% { opacity: 1; }
+}
+
+/* ===== 滑动变焦 Dolly Zoom ===== */
+.mi-dollyzoom .mi-subject {
+    width: 10px;
+    height: 10px;
+    z-index: 2;
+}
+.mi-dollyzoom .mi-bg {
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--text-muted);
+    border-radius: 2px;
+    animation: mi-dz-bg 3s infinite ease-in-out;
+}
+@keyframes mi-dz-bg {
+    0%, 100% { inset: 8px; }
+    50% { inset: 2px; }
+}
+.mi-dollyzoom.rev .mi-bg {
+    animation: mi-dz-bg-rev 3s infinite ease-in-out;
+}
+@keyframes mi-dz-bg-rev {
+    0%, 100% { inset: 2px; }
+    50% { inset: 8px; }
+}
+
+/* ===== 荷兰角 Dutch ===== */
+.mi-dutch .mi-frame {
+    width: 40px;
+    height: 28px;
+    border: 1.5px solid var(--duo-orange);
+    border-radius: 2px;
+    animation: mi-dutch-tilt 3s infinite ease-in-out;
+}
+@keyframes mi-dutch-tilt {
+    0%, 100% { transform: rotate(0); }
+    50% { transform: rotate(18deg); }
+}
+
+/* ===== 手持 Handheld ===== */
+.mi-handheld .mi-frame {
+    width: 36px;
+    height: 26px;
+    border: 1.5px solid var(--text-secondary);
+    border-radius: 2px;
+    animation: mi-shake 0.15s infinite alternate;
+}
+@keyframes mi-shake {
+    from { transform: translate(-0.5px, 0.3px) rotate(-0.5deg); }
+    to { transform: translate(0.5px, -0.3px) rotate(0.5deg); }
+}
+
+/* ===== 斯坦尼康 Steadicam ===== */
+.mi-steadicam .mi-path {
+    width: 40px;
+    height: 2px;
+    background: var(--border-color);
+    border-radius: 1px;
+    position: absolute;
+    top: 50%;
+    left: 12px;
+}
+.mi-steadicam .mi-cam {
+    top: 46%;
+    left: 12px;
+    animation: mi-steady-move 3s infinite ease-in-out;
+}
+@keyframes mi-steady-move {
+    0%, 100% { left: 12px; }
+    50% { left: 42px; }
+}
+
+/* ===== 环绕 Orbit ===== */
+.mi-orbit .mi-subject {
+    width: 10px;
+    height: 10px;
+}
+.mi-orbit .mi-cam {
+    top: 50%;
+    left: 50%;
+    animation: mi-orbit-spin 4s infinite linear;
+    transform-origin: -12px 0;
+}
+@keyframes mi-orbit-spin {
+    from { transform: rotate(0deg) translateX(20px); }
+    to { transform: rotate(360deg) translateX(20px); }
+}
+.mi-orbit.low .mi-cam {
+    animation: mi-orbit-spin 4s infinite linear;
+}
+
+/* ===== 快速前推急停 ===== */
+.mi-fastpush .mi-cam {
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
+    animation: mi-fastpush-move 2s infinite;
+}
+@keyframes mi-fastpush-move {
+    0%, 100% { bottom: 8px; }
+    30% { bottom: 36px; }
+    35%, 60% { bottom: 36px; }
+    90% { bottom: 8px; }
+}
+
+/* ===== 横向左移 ===== */
+.mi-lateral-l .mi-cam {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%) rotate(180deg);
+    animation: mi-lat-l 3s infinite ease-in-out;
+}
+@keyframes mi-lat-l {
+    0%, 100% { right: 8px; }
+    50% { right: 38px; }
+}
+
+/* ===== 横向右移 ===== */
+.mi-lateral-r .mi-cam {
+    top: 50%;
+    left: 8px;
+    transform: translateY(-50%);
+    animation: mi-lat-r 3s infinite ease-in-out;
+}
+@keyframes mi-lat-r {
+    0%, 100% { left: 8px; }
+    50% { left: 38px; }
+}
+
+/* ===== 俯冲 Dive ===== */
+.mi-dive .mi-ground {
+    position: absolute;
+    bottom: 6px;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: var(--text-muted);
+}
+.mi-dive .mi-cam {
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+    animation: mi-dive-fall 2.5s infinite ease-in;
+}
+@keyframes mi-dive-fall {
+    0%, 100% { top: 6px; }
+    60% { top: 44px; }
+    70%, 90% { top: 44px; }
+}
+
+/* ===== 升空 Rise ===== */
+.mi-rise .mi-ground {
+    position: absolute;
+    bottom: 6px;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: var(--text-muted);
+}
+.mi-rise .mi-cam {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
+    animation: mi-rise-up 2.5s infinite ease-out;
+}
+@keyframes mi-rise-up {
+    0%, 100% { bottom: 10px; }
+    50% { bottom: 48px; }
+}
+
+/* ===== 螺旋 Spiral ===== */
+.mi-spiral .mi-cam {
+    top: 50%;
+    left: 50%;
+    animation: mi-spiral-spin 3s infinite linear;
+}
+@keyframes mi-spiral-spin {
+    0% { transform: rotate(0deg) translateX(18px) translateY(10px); }
+    50% { transform: rotate(180deg) translateX(14px) translateY(-10px); }
+    100% { transform: rotate(360deg) translateX(18px) translateY(10px); }
+}
+
+/* ===== POV ===== */
+.mi-pov .mi-eye {
+    width: 20px;
+    height: 12px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 50%;
+    position: relative;
+}
+.mi-pov .mi-eye::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: mi-pov-look 2.5s infinite ease-in-out;
+}
+@keyframes mi-pov-look {
+    0%, 100% { transform: translate(-50%, -50%); }
+    25% { transform: translate(-20%, -50%); }
+    75% { transform: translate(-80%, -50%); }
+}
+
+/* ===== FPV 穿梭 ===== */
+.mi-fpv .mi-tunnel {
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid var(--text-muted);
+    border-radius: 50%;
+    animation: mi-fpv-zoom 2s infinite;
+}
+.mi-fpv .mi-cam {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+@keyframes mi-fpv-zoom {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1.2); opacity: 1; }
+}
+
+/* ===== 背跟 Behind ===== */
+.mi-behind .mi-subject {
+    top: 30%;
+}
+.mi-behind .mi-cam {
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
+    animation: mi-behind-move 3s infinite ease-in-out;
+}
+@keyframes mi-behind-move {
+    0%, 100% { bottom: 8px; transform: translateX(-50%) rotate(-90deg); }
+    50% { bottom: 20px; transform: translateX(-50%) rotate(-90deg); }
+}
+
+/* ===== 过肩 Over Shoulder ===== */
+.mi-overshoulder .mi-shoulder {
+    width: 16px;
+    height: 20px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    border: 1px solid var(--border-color);
+}
+.mi-overshoulder .mi-subject {
+    top: 30%;
+    left: 60%;
+}
+
+/* ===== 时间冻结 Freeze ===== */
+.mi-freeze .mi-subject {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(88,204,2,0.3);
+}
+.mi-freeze .mi-cam {
+    top: 50%;
+    left: 50%;
+    animation: mi-orbit-spin 3s infinite linear;
+    transform-origin: -14px 0;
+}
+
+/* ===== 匹配动势 ===== */
+.mi-match .mi-subject {
+    animation: mi-match-subj 2s infinite ease-in-out;
+}
+.mi-match .mi-cam {
+    top: 50%;
+    left: 10px;
+    animation: mi-match-cam 2s infinite ease-in-out;
+}
+@keyframes mi-match-subj {
+    0%, 100% { left: 30%; }
+    50% { left: 65%; }
+}
+@keyframes mi-match-cam {
+    0%, 100% { left: 10px; }
+    50% { left: 35px; }
+}
+
+/* ===== 默认 ===== */
+.mi-default .mi-cam {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ===== 调色预览 ===== */
+.mi-color {
+    border-radius: 8px;
+    padding: 4px;
+}
+.mi-color-swatch {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    animation: mi-color-pulse 3s infinite ease-in-out;
+}
+@keyframes mi-color-pulse {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* ===== 表情预览容器 ===== */
+.mi-expr {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+.mi-expr svg {
+    width: 48px;
+    height: 48px;
+    stroke: var(--text-secondary);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ===== Hover 加速 ===== */
+.library-card:hover .mi *,
+.at-chip-preview:hover .mi *,
+.exp-card:hover .mi * {
+    animation-duration: 1s !important;
+}
+
+
+/* ===== @ 弹窗中的 chip + 预览 ===== */
+.at-chip-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.at-chip-preview {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    border: 1px solid var(--duo-green);
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 10;
+    width: 80px;
+    height: 80px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.at-chip-wrap:hover .at-chip-preview {
+    display: flex;
+}
+
+.at-chip-preview .mi {
+    width: 64px;
+    height: 64px;
+}
+
+/* 运镜库卡片图标位置 */
+.library-card-icon {
+    margin-bottom: 10px;
+}
+
+.library-card-icon .mi {
+    margin: 0 auto;
+}
+
+
+/* ===== 景别动画 ===== */
+
+/* 大远景：极小人物 + 大环境 */
+.mi-els .mi-landscape {
+    position: absolute;
+    bottom: 8px;
+    left: 6px;
+    right: 6px;
+    height: 20px;
+    border-radius: 10px 10px 0 0;
+    background: linear-gradient(0deg, var(--border-color) 0%, transparent 100%);
+}
+.mi-els .mi-tiny-person {
+    width: 3px;
+    height: 6px;
+    background: var(--duo-green);
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    border-radius: 1px;
+    animation: mi-els-breathe 3s infinite ease-in-out;
+}
+@keyframes mi-els-breathe {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* 远景 */
+.mi-ls .mi-ground-line {
+    position: absolute;
+    bottom: 12px;
+    left: 8px;
+    right: 8px;
+    height: 1px;
+    background: var(--border-color);
+}
+.mi-ls .mi-small-person {
+    width: 4px;
+    height: 12px;
+    background: var(--duo-green);
+    position: absolute;
+    bottom: 13px;
+    left: 50%;
+    border-radius: 2px 2px 0 0;
+}
+
+/* 全景 */
+.mi-fs .mi-full-person {
+    width: 8px;
+    height: 32px;
+    background: var(--duo-green);
+    border-radius: 4px 4px 1px 1px;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.mi-fs .mi-full-person::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -6px;
+    left: 0;
+}
+
+/* 中全景 */
+.mi-mfs .mi-mfs-person {
+    width: 10px;
+    height: 28px;
+    background: var(--duo-green);
+    border-radius: 5px 5px 0 0;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.mi-mfs .mi-mfs-person::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -8px;
+}
+
+/* 中景 */
+.mi-ms .mi-ms-person {
+    width: 14px;
+    height: 24px;
+    background: var(--duo-green);
+    border-radius: 7px 7px 0 0;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.mi-ms .mi-ms-person::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -10px;
+    left: 1px;
+}
+
+/* 中近景 */
+.mi-mcu .mi-mcu-person {
+    width: 20px;
+    height: 20px;
+    background: var(--duo-green);
+    border-radius: 10px 10px 0 0;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.mi-mcu .mi-mcu-person::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -14px;
+    left: 2px;
+}
+
+/* 近景 */
+.mi-cu .mi-cu-face {
+    width: 28px;
+    height: 32px;
+    border: 2px solid var(--duo-green);
+    border-radius: 14px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.mi-cu .mi-cu-face::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 6px;
+    width: 4px;
+    height: 4px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    box-shadow: 10px 0 0 var(--duo-green);
+}
+
+/* 特写 */
+.mi-bcu .mi-bcu-eye {
+    width: 24px;
+    height: 12px;
+    border: 2px solid var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.mi-bcu .mi-bcu-eye::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: mi-bcu-look 2.5s infinite ease-in-out;
+}
+@keyframes mi-bcu-look {
+    0%, 100% { transform: translate(-50%, -50%); }
+    30% { transform: translate(-30%, -50%); }
+    70% { transform: translate(-70%, -50%); }
+}
+
+/* 大特写 */
+.mi-ecu .mi-ecu-detail {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: mi-ecu-pulse 2s infinite;
+}
+@keyframes mi-ecu-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(88,204,2,0.3); }
+    50% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 0 6px rgba(88,204,2,0); }
+}
+
+/* 微距 */
+.mi-macro .mi-macro-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.mi-macro .mi-macro-ring {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: mi-macro-zoom 2.5s infinite;
+    opacity: 0.5;
+}
+@keyframes mi-macro-zoom {
+    0% { width: 30px; height: 30px; opacity: 0.5; }
+    50% { width: 50px; height: 50px; opacity: 0.2; }
+    100% { width: 30px; height: 30px; opacity: 0.5; }
+}
+
+/* ===== 机位角度动画 ===== */
+
+.mi-angle-person {
+    width: 6px;
+    height: 20px;
+    background: var(--duo-green);
+    border-radius: 3px 3px 0 0;
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.mi-angle-person::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -7px;
+    left: -1px;
+}
+
+/* 俯拍 */
+.mi-overhead .mi-angle-cam {
+    width: 0;
+    height: 0;
+    border-left: 5px solid var(--duo-blue);
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+    animation: mi-overhead-bob 3s infinite ease-in-out;
+}
+@keyframes mi-overhead-bob {
+    0%, 100% { top: 6px; }
+    50% { top: 10px; }
+}
+
+/* 仰拍 */
+.mi-lowangle .mi-angle-cam {
+    width: 0;
+    height: 0;
+    border-left: 5px solid var(--duo-blue);
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
+    animation: mi-lowangle-bob 3s infinite ease-in-out;
+}
+@keyframes mi-lowangle-bob {
+    0%, 100% { bottom: 4px; }
+    50% { bottom: 8px; }
+}
+
+/* 平视 */
+.mi-eyelevel .mi-angle-cam {
+    width: 0;
+    height: 0;
+    border-left: 5px solid var(--duo-blue);
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+}
+
+/* 侧面 */
+.mi-sideview .mi-side-person {
+    width: 6px;
+    height: 22px;
+    background: var(--duo-green);
+    border-radius: 3px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.mi-sideview .mi-side-person::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -7px;
+    left: -1px;
+}
+.mi-sideview::after {
+    content: '';
+    width: 1px;
+    height: 40px;
+    background: var(--duo-blue);
+    position: absolute;
+    top: 12px;
+    left: 18px;
+    opacity: 0.5;
+}
+
+/* 背影 */
+.mi-backview .mi-back-person {
+    width: 12px;
+    height: 24px;
+    background: var(--duo-green);
+    border-radius: 6px 6px 2px 2px;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.7;
+}
+.mi-backview .mi-back-person::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--duo-green);
+    border-radius: 50%;
+    position: absolute;
+    top: -8px;
+    left: 1px;
+    opacity: 0.7;
+}

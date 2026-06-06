@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>导演台 — AI分镜提示词生成器</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
+    <link rel="stylesheet" href="motion-icons.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部导航 -->
+        <header class="top-bar">
+            <div class="logo">
+                <span class="logo-icon">🎬</span>
+                <span class="logo-text">导演台</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="generate">智能分镜</button>
+                <button class="nav-tab" data-tab="library">运镜库</button>
+                <button class="nav-tab" data-tab="colors">调色盘</button>
+                <button class="nav-tab" data-tab="expressions">表情/肢体/血色</button>
+            </nav>
+            <div class="top-bar-right">
+                <button class="btn-icon" id="theme-toggle" title="切换主题">🌙</button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 分镜生成页 -->
+            <section class="tab-panel active" id="panel-generate">
+                <div class="hero-section">
+                    <h1 class="hero-title">一句话，拆解完整分镜</h1>
+                    <p class="hero-subtitle">输入剧情描述，AI 自动生成专业级分镜方案与视频生成提示词</p>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="scene-input" placeholder="例：男人深夜走进赌场，推开厚重的门，霓虹灯映在他疲惫的脸上..." rows="3"></textarea>
+                        
+                        <!-- 控制面板 -->
+                        <div class="control-panel">
+                            <div class="control-row">
+                                <div class="control-item">
+                                    <label>🎬 视频模型</label>
+                                    <select id="video-model">
+                                        <option value="seedance">Seedance 2.0</option>
+                                        <option value="kling">Kling 3.0 Audio</option>
+                                        <option value="veo">Veo 3.1</option>
+                                        <option value="happyhorse">Happy Horse</option>
+                                    </select>
+                                </div>
+                                <div class="control-item">
+                                    <label>🎭 导演风格</label>
+                                    <select id="director-style">
+                                        <option value="auto">自动匹配</option>
+                                        <option value="hitchcock">希区柯克</option>
+                                        <option value="kubrick">库布里克</option>
+                                        <option value="wong">王家卫</option>
+                                        <option value="fincher">大卫·芬奇</option>
+                                        <option value="anderson">韦斯·安德森</option>
+                                        <option value="scorsese">斯科塞斯</option>
+                                        <option value="to">杜琪峰</option>
+                                        <option value="cuaron">卡隆/卢贝兹基</option>
+                                    </select>
+                                </div>
+                                <div class="control-item">
+                                    <label>👥 清晰人物数</label>
+                                    <select id="character-count">
+                                        <option value="auto">自动识别</option>
+                                        <option value="1">1人（最稳）</option>
+                                        <option value="2">2人对话</option>
+                                        <option value="3">3人对峙</option>
+                                        <option value="crowd">群演背景模糊</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="control-row">
+                                <div class="control-item control-checkbox">
+                                    <label><input type="checkbox" id="lock-continuity" checked> 🔒 连续性锁定</label>
+                                </div>
+                                <div class="control-item control-checkbox">
+                                    <label><input type="checkbox" id="lip-sync" checked> 👄 台词口型控制</label>
+                                </div>
+                                <div class="control-item control-checkbox">
+                                    <label><input type="checkbox" id="anti-collapse" checked> 🛡️ 防崩约束</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-controls">
+                            <div class="input-hint">按 Enter 生成 · Shift+Enter 换行</div>
+                            <button class="btn-generate" id="btn-generate">
+                                <span class="btn-text">生成分镜</span>
+                                <span class="btn-icon-right">→</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分镜输出区 -->
+                <div class="output-area" id="output-area" style="display:none;">
+                    <div class="output-header">
+                        <h2 class="output-title">分镜方案</h2>
+                        <div class="output-actions">
+                            <button class="btn-sm" id="btn-copy-all">📋 复制全部</button>
+                            <button class="btn-sm" id="btn-export">📤 导出JSON</button>
+                        </div>
+                    </div>
+                    <div class="shots-container" id="shots-container">
+                        <!-- 动态生成的分镜卡片 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 运镜库页 -->
+            <section class="tab-panel" id="panel-library">
+                <div class="library-header">
+                    <h2>运镜技法库</h2>
+                    <div class="library-filters">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="shotsize">景别</button>
+                        <button class="filter-btn" data-filter="angle">机位角度</button>
+                        <button class="filter-btn" data-filter="basic">基础运镜</button>
+                        <button class="filter-btn" data-filter="advanced">进阶技法</button>
+                        <button class="filter-btn" data-filter="seedance">Seedance 2.0</button>
+                        <button class="filter-btn" data-filter="dialogue_duo">双人对话</button>
+                        <button class="filter-btn" data-filter="dialogue">单人对话</button>
+                        <button class="filter-btn" data-filter="emotion">情绪驱动</button>
+                    </div>
+                </div>
+                <div class="library-grid" id="library-grid">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 调色盘页 -->
+            <section class="tab-panel" id="panel-colors">
+                <div class="colors-header">
+                    <h2>调色情绪盘</h2>
+                    <p>世界观调色 > 情绪调色 — 选择色调即可获得 Seedance 2.0 提示词</p>
+                    <div class="color-filters">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="warm">暖色系</button>
+                        <button class="filter-btn" data-filter="cool">冷色系</button>
+                        <button class="filter-btn" data-filter="neutral">中性色</button>
+                        <button class="filter-btn" data-filter="special">特殊色</button>
+                    </div>
+                </div>
+                <div class="colors-grid" id="colors-grid">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+
+            <!-- 表情/肢体/血色库页 -->
+            <section class="tab-panel" id="panel-expressions">
+                <div class="library-header">
+                    <h2>表情 · 肢体 · 血色库</h2>
+                    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">输入框中用 @名称 可直接调用 · 点击卡片复制提示词</p>
+                    <div class="library-filters">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="face">面部微表情</button>
+                        <button class="filter-btn" data-filter="body">肢体动作</button>
+                        <button class="filter-btn" data-filter="blood">面部血色</button>
+                    </div>
+                </div>
+                <div class="library-grid" id="expressions-grid">
+                    <!-- 动态生成 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="engine.js"></script>
+    <script src="ai-engine.js"></script>
+    <script src="motion-icons.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
