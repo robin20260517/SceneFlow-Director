@@ -918,3 +918,52 @@ body {
     .shot-body { grid-template-columns: 1fr; }
     .shot-diagram .sd-box { width: 150px; height: 96px; }
 }
+
+/* ============================================
+   剧本工坊 — 独立文档视图
+   ============================================ */
+.script-output-area {
+    margin-top: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.script-output-area .output-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 20px; border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary); position: sticky; top: 0; z-index: 5;
+}
+.script-output-area .output-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.script-loading { padding: 48px 24px; text-align: center; color: var(--text-secondary); font-size: 15px; }
+
+.script-doc {
+    max-width: 820px; margin: 0 auto;
+    padding: 32px 32px 80px; line-height: 1.85;
+    color: var(--text-primary); font-size: 15px;
+    max-height: 75vh; overflow-y: auto;
+}
+.script-doc h1 { font-size: 28px; font-weight: 900; border-bottom: 2px solid var(--duo-green); padding-bottom: 12px; margin: 8px 0 20px; }
+.script-doc h2 { font-size: 22px; font-weight: 800; color: var(--duo-green); border-left: 4px solid var(--duo-green); padding-left: 12px; margin: 36px 0 14px; }
+.script-doc h3 { font-size: 17px; font-weight: 700; color: var(--duo-blue); margin: 24px 0 10px; }
+.script-doc h4 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 18px 0 8px; }
+.script-doc p { margin: 8px 0; }
+.script-doc strong { color: #fff; font-weight: 700; }
+.script-doc ul { padding-left: 22px; margin: 8px 0; }
+.script-doc li { margin: 4px 0; }
+.script-doc blockquote {
+    border-left: 3px solid var(--duo-yellow, #ffc800);
+    background: rgba(255, 200, 0, 0.08);
+    margin: 12px 0; padding: 8px 16px; border-radius: 6px;
+    color: var(--text-secondary); font-size: 14px;
+}
+.script-doc hr { border: none; border-top: 1px dashed var(--border-color); margin: 24px 0; }
+.script-doc code { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px; }
+.script-doc table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13.5px; }
+.script-doc th, .script-doc td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; vertical-align: top; }
+.script-doc th { background: rgba(88, 204, 2, 0.12); font-weight: 700; }
+
+@media (max-width: 600px) {
+    .script-doc { padding: 20px 16px 60px; max-height: none; }
+}

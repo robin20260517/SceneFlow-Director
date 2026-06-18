@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initDirectorOptions();
     initDirectorGallery();
+    initScriptStudio();
     initTabs();
     initGenerate();
     initLibrary();
@@ -13,6 +14,154 @@ document.addEventListener('DOMContentLoaded', () => {
     initExpressions();
     initAtMention();
 });
+
+// ===== 剧本工坊 =====
+let lastScriptMarkdown = '';
+let lastScriptTitle = '短剧剧本';
+
+function initScriptStudio() {
+    const btn = document.getElementById('btn-gen-script');
+    if (!btn || typeof generateDramaScript === 'undefined') return;
+    const modeSel = document.getElementById('script-mode');
+    const regionWrap = document.getElementById('script-region-wrap');
+
+    const fill = (id, arr, mapper) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = arr.map(mapper).join('');
+    };
+    const opt = (v, l) => `<option value="${v}">${l || v}</option>`;
+
+    function fillGenre() {
+        const overseas = modeSel.value === 'overseas';
+        const list = overseas ? SCRIPT_OVERSEAS : SCRIPT_GENRES;
+        fill('script-genre', ['自动判断', ...list], g => opt(g === '自动判断' ? '' : g, g));
+    }
+    fill('script-tone', SCRIPT_TONES, t => opt(t));
+    fill('script-ending', SCRIPT_ENDINGS, t => opt(t));
+    fill('script-audience', SCRIPT_AUDIENCES, t => opt(t));
+    fill('script-scale', SCRIPT_SCALES, s => opt(s.v, s.label));
+    fill('script-region', OVERSEAS_REGIONS, r => opt(r));
+    fillGenre();
+
+    modeSel.addEventListener('change', () => {
+        regionWrap.style.display = modeSel.value === 'overseas' ? '' : 'none';
+        fillGenre();
+    });
+
+    btn.addEventListener('click', () => doGenerateScript(btn));
+
+    document.getElementById('btn-script-copy').addEventListener('click', () => {
+        copyToClipboard(lastScriptMarkdown); showToast('已复制剧本全文');
+    });
+    document.getElementById('btn-script-export').addEventListener('click', () => {
+        const blob = new Blob([lastScriptMarkdown], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `${lastScriptTitle}.md`; a.click();
+        URL.revokeObjectURL(url); showToast('已导出 .md');
+    });
+    document.getElementById('btn-script-window').addEventListener('click', openScriptInNewWindow);
+}
+
+function doGenerateScript(btn) {
+    const idea = document.getElementById('script-idea').value.trim();
+    if (!idea) { showToast('请输入故事灵感'); return; }
+    const opts = {
+        mode: document.getElementById('script-mode').value,
+        genre: document.getElementById('script-genre').value,
+        tone: document.getElementById('script-tone').value,
+        ending: document.getElementById('script-ending').value,
+        audience: document.getElementById('script-audience').value,
+        scale: document.getElementById('script-scale').value,
+        region: document.getElementById('script-region').value,
+        firstN: document.getElementById('script-firstn').value
+    };
+    const outArea = document.getElementById('script-output-area');
+    const doc = document.getElementById('script-doc');
+    btn.classList.add('loading');
+    btn.querySelector('.btn-text').textContent = 'Claude 创作中';
+    outArea.style.display = 'block';
+    doc.innerHTML = '<div class="script-loading">✍️ 正在构建创作方案、角色、分集目录与剧本，请稍候…</div>';
+    outArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const onProgress = (attempt) => {
+        if (attempt > 1) doc.innerHTML = `<div class="script-loading">✍️ 模型偶发空返回，正在第 ${attempt} 次重试…</div>`;
+    };
+    generateDramaScript(idea, opts, onProgress).then(res => {
+        btn.classList.remove('loading');
+        btn.querySelector('.btn-text').textContent = '一键生成剧本';
+        if (res.success) {
+            lastScriptMarkdown = res.markdown;
+            lastScriptTitle = (res.markdown.match(/^#\s+(.+)$/m)?.[1] || '短剧剧本').replace(/[📺#*\/\\:?"<>|]/g, '').trim().slice(0, 40) || '短剧剧本';
+            doc.innerHTML = mdToHtml(res.markdown);
+        } else {
+            doc.innerHTML = `<div class="script-loading">❌ 生成失败：${escapeHtml(res.error)}</div>`;
+        }
+    });
+}
+
+// 在新窗口以独立页面阅读剧本
+function openScriptInNewWindow() {
+    if (!lastScriptMarkdown) { showToast('还没有剧本'); return; }
+    const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(lastScriptTitle)}</title>
+<style>
+  body{margin:0;background:#13141a;color:#e8e8ea;font-family:"Noto Sans SC",system-ui,sans-serif;line-height:1.8;}
+  .doc{max-width:820px;margin:0 auto;padding:48px 28px 120px;}
+  h1{font-size:30px;border-bottom:2px solid #58cc02;padding-bottom:12px;}
+  h2{font-size:23px;margin-top:40px;color:#58cc02;border-left:4px solid #58cc02;padding-left:12px;}
+  h3{font-size:18px;margin-top:28px;color:#1cb0f6;}
+  blockquote{border-left:3px solid #ffc800;background:rgba(255,200,0,.08);margin:14px 0;padding:10px 16px;border-radius:6px;color:#cfcfd4;}
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;}
+  th,td{border:1px solid #333;padding:8px 12px;text-align:left;}
+  th{background:rgba(88,204,2,.12);}
+  hr{border:none;border-top:1px dashed #333;margin:28px 0;}
+  code{background:#000;padding:2px 6px;border-radius:4px;font-size:13px;}
+  strong{color:#fff;}
+  ul{padding-left:22px;}
+  p{margin:8px 0;}
+</style></head><body><div class="doc">${mdToHtml(lastScriptMarkdown)}</div></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    window.open(URL.createObjectURL(blob), '_blank');
+}
+
+// 轻量 Markdown → HTML（标题/粗体/列表/表格/引用/分隔线）
+function mdToHtml(md) {
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const inline = s => esc(s)
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+    const cells = r => r.replace(/^\s*\||\|\s*$/g, '').split('|').map(c => c.trim());
+    const renderTable = rows => {
+        if (rows.length < 1) return '';
+        const head = cells(rows[0]);
+        const body = rows.length >= 2 && /^[\s:|-]+$/.test(rows[1].replace(/\|/g, '')) ? rows.slice(2) : rows.slice(1);
+        let h = '<table><thead><tr>' + head.map(c => `<th>${inline(c)}</th>`).join('') + '</tr></thead><tbody>';
+        body.forEach(r => { h += '<tr>' + cells(r).map(c => `<td>${inline(c)}</td>`).join('') + '</tr>'; });
+        return h + '</tbody></table>';
+    };
+    const lines = md.replace(/\r\n/g, '\n').split('\n');
+    let html = '', inUL = false, tbl = [];
+    const closeUL = () => { if (inUL) { html += '</ul>'; inUL = false; } };
+    const flushTbl = () => { if (tbl.length) { html += renderTable(tbl); tbl = []; } };
+    for (const ln of lines) {
+        const t = ln.trim();
+        if (/^\|.*\|$/.test(t)) { closeUL(); tbl.push(t); continue; }
+        flushTbl();
+        if (t === '') { closeUL(); continue; }
+        const h = t.match(/^(#{1,6})\s+(.*)$/);
+        if (h) { closeUL(); html += `<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`; continue; }
+        if (/^([-*_])\1{2,}$/.test(t)) { closeUL(); html += '<hr>'; continue; }
+        if (/^>\s?/.test(t)) { closeUL(); html += `<blockquote>${inline(t.replace(/^>\s?/, ''))}</blockquote>`; continue; }
+        const li = t.match(/^[-*]\s+(.*)$/);
+        if (li) { if (!inUL) { html += '<ul>'; inUL = true; } html += `<li>${inline(li[1])}</li>`; continue; }
+        closeUL();
+        html += `<p>${inline(t)}</p>`;
+    }
+    closeUL(); flushTbl();
+    return html;
+}
 
 // 把 31 位导演（DIRECTOR_PROFILES）填进导演下拉框
 function initDirectorOptions() {

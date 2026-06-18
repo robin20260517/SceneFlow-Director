@@ -22,6 +22,7 @@
             </div>
             <nav class="nav-tabs">
                 <button class="nav-tab active" data-tab="generate">智能分镜</button>
+                <button class="nav-tab" data-tab="script">剧本工坊</button>
                 <button class="nav-tab" data-tab="directors">导演库</button>
                 <button class="nav-tab" data-tab="library">运镜库</button>
                 <button class="nav-tab" data-tab="colors">调色盘</button>
@@ -120,6 +121,86 @@
                 </div>
             </section>
 
+            <!-- 剧本工坊页 -->
+            <section class="tab-panel" id="panel-script">
+                <div class="hero-section">
+                    <h1 class="hero-title">一句话，生成完整短剧剧本</h1>
+                    <p class="hero-subtitle">海内 / 海外双模式 · 创作方案 + 角色 + 分集目录 + 前几集完整剧本（Claude 4.6）</p>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="script-idea" rows="3" placeholder="例：被豪门退婚的废柴少爷，其实是隐藏的商业战神，三年后携百亿资本归来打脸全家..."></textarea>
+
+                        <div class="control-panel">
+                            <div class="control-row">
+                                <div class="control-item">
+                                    <label>🌍 模式</label>
+                                    <select id="script-mode">
+                                        <option value="domestic">海内（中文）</option>
+                                        <option value="overseas">海外（English）</option>
+                                    </select>
+                                </div>
+                                <div class="control-item" id="script-region-wrap" style="display:none;">
+                                    <label>🗺️ 出海市场</label>
+                                    <select id="script-region"></select>
+                                </div>
+                                <div class="control-item">
+                                    <label>🎭 题材</label>
+                                    <select id="script-genre"></select>
+                                </div>
+                                <div class="control-item">
+                                    <label>🎚️ 基调</label>
+                                    <select id="script-tone"></select>
+                                </div>
+                            </div>
+                            <div class="control-row">
+                                <div class="control-item">
+                                    <label>🏁 结局</label>
+                                    <select id="script-ending"></select>
+                                </div>
+                                <div class="control-item">
+                                    <label>👥 受众</label>
+                                    <select id="script-audience"></select>
+                                </div>
+                                <div class="control-item">
+                                    <label>📚 集数规模</label>
+                                    <select id="script-scale"></select>
+                                </div>
+                                <div class="control-item">
+                                    <label>✍️ 先写几集</label>
+                                    <select id="script-firstn">
+                                        <option value="1">前 1 集</option>
+                                        <option value="3" selected>前 3 集</option>
+                                        <option value="5">前 5 集</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-controls">
+                            <div class="input-hint">⏱️ 完整剧本生成较慢，请耐心等待 30-90 秒</div>
+                            <button class="btn-generate" id="btn-gen-script">
+                                <span class="btn-text">一键生成剧本</span>
+                                <span class="btn-icon-right">→</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="script-output-area" id="script-output-area" style="display:none;">
+                    <div class="output-header">
+                        <h2 class="output-title">📜 剧本</h2>
+                        <div class="output-actions">
+                            <button class="btn-sm" id="btn-script-copy">📋 复制全文</button>
+                            <button class="btn-sm" id="btn-script-export">📤 导出 .md</button>
+                            <button class="btn-sm" id="btn-script-window">🪟 新窗口阅读</button>
+                        </div>
+                    </div>
+                    <div class="script-doc" id="script-doc"></div>
+                </div>
+            </section>
+
             <!-- 导演库页 -->
             <section class="tab-panel" id="panel-directors">
                 <div class="library-header directors-header">
@@ -209,6 +290,7 @@
     <script src="data.js"></script>
     <script src="directors.js"></script>
     <script src="director-gallery.js"></script>
+    <script src="script-engine.js"></script>
     <script src="engine.js"></script>
     <script src="ai-engine.js"></script>
     <script src="motion-icons.js"></script>
