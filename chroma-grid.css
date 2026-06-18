@@ -1,0 +1,125 @@
+/* ============================================
+   ChromaGrid — 导演库聚光灯网格（Vanilla 移植自 React Bits）
+   默认灰度，鼠标聚光处恢复彩色
+   ============================================ */
+.chroma-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 70vh;
+}
+
+.chroma-grid {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 4), 1fr);
+    gap: 14px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8px;
+    box-sizing: border-box;
+    --x: 50%;
+    --y: 50%;
+    --r: 280px;
+}
+
+@media (max-width: 1024px) { .chroma-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px)  { .chroma-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px)  { .chroma-grid { grid-template-columns: 1fr; } }
+
+.chroma-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+    transition: border-color 0.3s ease, transform 0.2s ease;
+    background: var(--card-gradient, linear-gradient(145deg, #3a3a3a, #000));
+    cursor: pointer;
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+    --spotlight-color: rgba(255, 255, 255, 0.28);
+}
+.chroma-card:hover { border-color: var(--card-border, #888); transform: translateY(-3px); }
+
+.chroma-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 70%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 2;
+}
+.chroma-card:hover::before { opacity: 1; }
+
+.chroma-img-wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 8px 8px 0;
+    box-sizing: border-box;
+}
+.chroma-img-wrapper img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center 22%;
+    border-radius: 10px;
+    display: block;
+    background: #1a1a1a;
+}
+.chroma-img-wrapper.img-fail { position: relative; }
+.chroma-img-wrapper.img-fail img { opacity: 0.15; }
+.chroma-img-wrapper.img-fail::after {
+    content: '🎬';
+    position: absolute; inset: 8px 8px 0; display: flex; align-items: center; justify-content: center;
+    font-size: 48px; opacity: 0.5;
+}
+
+.chroma-info {
+    position: relative;
+    z-index: 1;
+    padding: 10px 14px 14px;
+    color: #fff;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 3px;
+    column-gap: 10px;
+}
+.chroma-info .name { font-size: 15px; font-weight: 800; margin: 0; line-height: 1.3; }
+.chroma-info .role { font-size: 12px; color: #b9b9b9; grid-column: 1 / -1; line-height: 1.4; }
+.chroma-info .handle { font-size: 11px; font-weight: 700; align-self: start; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,0.1); }
+
+/* 灰度遮罩：聚光圈外保持灰暗 */
+.chroma-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    backdrop-filter: grayscale(1) brightness(0.78);
+    -webkit-backdrop-filter: grayscale(1) brightness(0.78);
+    background: rgba(0, 0, 0, 0.001);
+    mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0%, transparent 15%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.68) 88%, #000 100%);
+    -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0%, transparent 15%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.68) 88%, #000 100%);
+}
+
+/* 离开时整体淡回灰度 */
+.chroma-fade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    backdrop-filter: grayscale(1) brightness(0.78);
+    -webkit-backdrop-filter: grayscale(1) brightness(0.78);
+    background: rgba(0, 0, 0, 0.001);
+    mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #fff 0%, #fff 15%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.78) 45%, rgba(255,255,255,0.65) 60%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.32) 88%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #fff 0%, #fff 15%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.78) 45%, rgba(255,255,255,0.65) 60%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.32) 88%, transparent 100%);
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+/* 分类筛选 */
+.directors-header { margin-bottom: 16px; }
+.directors-header p { font-size: 14px; color: var(--text-secondary); margin: 6px 0 14px; }

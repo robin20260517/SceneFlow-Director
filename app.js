@@ -5,6 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     initDirectorOptions();
+    initDirectorGallery();
     initTabs();
     initGenerate();
     initLibrary();
@@ -26,6 +27,85 @@ function initDirectorOptions() {
         group.appendChild(opt);
     });
     sel.appendChild(group);
+}
+
+// ===== 导演库 ChromaGrid（聚光灯灰度网格，Vanilla 移植）=====
+function initDirectorGallery() {
+    const grid = document.getElementById('director-grid');
+    const filters = document.querySelectorAll('#director-filters .filter-btn');
+    if (!grid || typeof DIRECTOR_GALLERY === 'undefined') return;
+
+    function render(filter) {
+        const items = (filter === 'all') ? DIRECTOR_GALLERY : DIRECTOR_GALLERY.filter(d => d.region === filter);
+        grid.innerHTML = items.map(d => {
+            const grad = `linear-gradient(145deg, ${d.color}, #000)`;
+            const key = encodeURIComponent(d.key);
+            return `<article class="chroma-card" data-key="${key}" style="--card-border:${d.color};--card-gradient:${grad}">
+                <div class="chroma-img-wrapper"><img src="${d.image}" alt="${escapeHtml(d.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.chroma-img-wrapper').classList.add('img-fail')"></div>
+                <footer class="chroma-info">
+                    <h3 class="name">${escapeHtml(d.name)}</h3>
+                    <span class="handle" style="color:${d.color}">${escapeHtml(d.region)}</span>
+                    <p class="role">${escapeHtml(d.subtitle)}</p>
+                </footer>
+            </article>`;
+        }).join('') + '<div class="chroma-overlay"></div><div class="chroma-fade"></div>';
+
+        grid.querySelectorAll('.chroma-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', (e.clientX - r.left) + 'px');
+                card.style.setProperty('--mouse-y', (e.clientY - r.top) + 'px');
+            });
+            card.addEventListener('click', () => selectDirectorStyle(decodeURIComponent(card.dataset.key)));
+        });
+    }
+
+    // 聚光灯位置 + 阻尼缓动
+    const state = { x: 0, y: 0, tx: 0, ty: 0, raf: null };
+    function tick() {
+        state.x += (state.tx - state.x) * 0.18;
+        state.y += (state.ty - state.y) * 0.18;
+        grid.style.setProperty('--x', state.x + 'px');
+        grid.style.setProperty('--y', state.y + 'px');
+        if (Math.abs(state.tx - state.x) > 0.4 || Math.abs(state.ty - state.y) > 0.4) {
+            state.raf = requestAnimationFrame(tick);
+        } else { state.raf = null; }
+    }
+    grid.addEventListener('pointermove', e => {
+        const r = grid.getBoundingClientRect();
+        state.tx = e.clientX - r.left;
+        state.ty = e.clientY - r.top;
+        if (!state.raf) state.raf = requestAnimationFrame(tick);
+        const fade = grid.querySelector('.chroma-fade');
+        if (fade) fade.style.opacity = '0';
+    });
+    grid.addEventListener('pointerleave', () => {
+        const fade = grid.querySelector('.chroma-fade');
+        if (fade) fade.style.opacity = '1';
+    });
+
+    filters.forEach(b => b.addEventListener('click', () => {
+        filters.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        render(b.dataset.filter);
+    }));
+    render('all');
+}
+
+// 点击导演卡片 → 选中该导演风格并跳到智能分镜
+function selectDirectorStyle(key) {
+    const sel = document.getElementById('director-style');
+    if (sel) sel.value = key;
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    const genTab = document.querySelector('.nav-tab[data-tab="generate"]');
+    if (genTab) genTab.classList.add('active');
+    document.getElementById('panel-generate').classList.add('active');
+    const d = (typeof DIRECTOR_GALLERY !== 'undefined') && DIRECTOR_GALLERY.find(x => x.key === key);
+    showToast(`已选导演风格：${d ? d.name : key} —— 输入剧情即按其风格生成`);
+    const input = document.getElementById('scene-input');
+    if (input) input.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ===== Tab 切换 =====

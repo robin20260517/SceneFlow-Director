@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="animations.css">
     <link rel="stylesheet" href="motion-icons.css">
+    <link rel="stylesheet" href="chroma-grid.css">
 </head>
 <body>
     <div id="app">
@@ -21,6 +22,7 @@
             </div>
             <nav class="nav-tabs">
                 <button class="nav-tab active" data-tab="generate">智能分镜</button>
+                <button class="nav-tab" data-tab="directors">导演库</button>
                 <button class="nav-tab" data-tab="library">运镜库</button>
                 <button class="nav-tab" data-tab="colors">调色盘</button>
                 <button class="nav-tab" data-tab="expressions">表情/肢体/血色</button>
@@ -118,6 +120,25 @@
                 </div>
             </section>
 
+            <!-- 导演库页 -->
+            <section class="tab-panel" id="panel-directors">
+                <div class="library-header directors-header">
+                    <h2>导演库</h2>
+                    <p>36 位导演 · 鼠标移到照片上点亮彩色 · 点击卡片即以该导演风格生成分镜</p>
+                    <div class="library-filters" id="director-filters">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="华语">华语</button>
+                        <button class="filter-btn" data-filter="好莱坞">好莱坞/欧美</button>
+                        <button class="filter-btn" data-filter="日本">日本</button>
+                        <button class="filter-btn" data-filter="韩国">韩国</button>
+                        <button class="filter-btn" data-filter="欧洲艺术">欧洲艺术</button>
+                    </div>
+                </div>
+                <div class="chroma-wrap">
+                    <div class="chroma-grid" id="director-grid"></div>
+                </div>
+            </section>
+
             <!-- 运镜库页 -->
             <section class="tab-panel" id="panel-library">
                 <div class="library-header">
@@ -187,6 +208,7 @@
 
     <script src="data.js"></script>
     <script src="directors.js"></script>
+    <script src="director-gallery.js"></script>
     <script src="engine.js"></script>
     <script src="ai-engine.js"></script>
     <script src="motion-icons.js"></script>
