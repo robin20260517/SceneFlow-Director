@@ -710,16 +710,18 @@ body {
 
 .at-picker-search {
     flex: 1;
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    color: var(--text-primary);
+    background: rgba(122,69,255,0.10);
+    border: 1px solid rgba(166,125,255,0.28);
+    border-radius: 999px;
+    padding: 9px 16px;
+    color: #fff;
     font-size: 14px;
     font-family: var(--font-display);
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
-
-.at-picker-search:focus { outline: none; border-color: var(--duo-green); }
+.at-picker-search::placeholder { color: rgba(255,255,255,0.45); }
+.at-picker-search:hover { border-color: rgba(166,125,255,0.5); }
+.at-picker-search:focus { outline: none; border-color: #a67dff; background: rgba(122,69,255,0.16); box-shadow: 0 0 0 3px rgba(125,71,255,0.18); }
 
 .at-picker-close {
     width: 32px; height: 32px; border: none;
@@ -1045,6 +1047,33 @@ body {
 .pb-check input { accent-color: #7a45ff; width: 15px; height: 15px; cursor: pointer; margin: 0; }
 .pb-check:hover { border-color: rgba(166,125,255,0.5); }
 .pb-check:has(input:checked) { color: #fff; background: rgba(122,69,255,0.20); border-color: rgba(166,125,255,0.6); box-shadow: inset 0 0 8px rgba(166,125,255,0.15); }
+
+/* ============================================
+   全局输入框统一玻璃风格（兜底：覆盖任何未单独指定样式的输入元素）
+   ============================================ */
+input[type="text"]:not(.pb-idea):not(.at-picker-search),
+input[type="search"]:not(.pb-idea):not(.at-picker-search),
+input:not([type]):not(.pb-idea):not(.at-picker-search),
+textarea:not(.pb-idea),
+select:not(.pb-select) {
+    background: rgba(122,69,255,0.10);
+    border: 1px solid rgba(166,125,255,0.28);
+    border-radius: 12px;
+    padding: 9px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: var(--font-display);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+input[type="text"]:not(.pb-idea):not(.at-picker-search)::placeholder,
+textarea:not(.pb-idea)::placeholder { color: rgba(255,255,255,0.45); }
+input[type="text"]:not(.pb-idea):not(.at-picker-search):focus,
+input[type="search"]:not(.pb-idea):not(.at-picker-search):focus,
+textarea:not(.pb-idea):focus,
+select:not(.pb-select):focus {
+    outline: none; border-color: #a67dff; background: rgba(122,69,255,0.16);
+    box-shadow: 0 0 0 3px rgba(125,71,255,0.18);
+}
 
 /* 紫色发光按钮 */
 .pb-ai-input-btn {
