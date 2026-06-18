@@ -42,67 +42,64 @@
                     <p class="hero-subtitle">输入剧情描述，AI 自动生成专业级分镜方案与视频生成提示词</p>
                 </div>
 
-                <div class="input-area">
-                    <div class="input-wrapper">
-                        <textarea id="scene-input" placeholder="例：男人深夜走进赌场，推开厚重的门，霓虹灯映在他疲惫的脸上..." rows="3"></textarea>
-                        
-                        <!-- 控制面板 -->
-                        <div class="control-panel">
-                            <div class="control-row">
-                                <div class="control-item">
-                                    <label>🎬 视频模型</label>
-                                    <select id="video-model">
-                                        <option value="seedance">Seedance 2.0</option>
-                                        <option value="kling">Kling 3.0 Audio</option>
-                                        <option value="veo">Veo 3.1</option>
-                                        <option value="happyhorse">Happy Horse</option>
-                                    </select>
-                                </div>
-                                <div class="control-item">
-                                    <label>🎭 导演风格</label>
-                                    <select id="director-style">
-                                        <option value="auto">自动匹配</option>
-                                        <optgroup label="经典风格（结构化）">
-                                            <option value="hitchcock">希区柯克</option>
-                                            <option value="kubrick">库布里克</option>
-                                            <option value="anderson">韦斯·安德森</option>
-                                            <option value="scorsese">斯科塞斯</option>
-                                            <option value="cuaron">卡隆/卢贝兹基</option>
-                                        </optgroup>
-                                        <!-- 导演智囊团 31 位由 app.js 从 DIRECTOR_PROFILES 动态填充 -->
-                                    </select>
-                                </div>
-                                <div class="control-item">
-                                    <label>👥 清晰人物数</label>
-                                    <select id="character-count">
-                                        <option value="auto">自动识别</option>
-                                        <option value="1">1人（最稳）</option>
-                                        <option value="2">2人对话</option>
-                                        <option value="3">3人对峙</option>
-                                        <option value="crowd">群演背景模糊</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="control-row">
-                                <div class="control-item control-checkbox">
-                                    <label><input type="checkbox" id="lock-continuity" checked> 🔒 连续性锁定</label>
-                                </div>
-                                <div class="control-item control-checkbox">
-                                    <label><input type="checkbox" id="lip-sync" checked> 👄 台词口型控制</label>
-                                </div>
-                                <div class="control-item control-checkbox">
-                                    <label><input type="checkbox" id="anti-collapse" checked> 🛡️ 防崩约束</label>
-                                </div>
-                            </div>
-                        </div>
+                <div class="pb-studio">
+                    <!-- 剧情输入：玻璃质感 composer -->
+                    <div class="pb-composer">
+                        <label class="pb-composer-label" for="scene-input">🎬 输入剧情描述 —— AI 自动拆解分镜 · 用 @ 可调用运镜/表情/调色</label>
+                        <textarea id="scene-input" class="pb-idea" rows="2" placeholder="例：男人深夜走进赌场，推开厚重的门，霓虹灯映在他疲惫的脸上…"></textarea>
+                    </div>
 
-                        <div class="input-controls">
-                            <div class="input-hint">按 Enter 生成 · Shift+Enter 换行</div>
-                            <button class="btn-generate" id="btn-generate">
-                                <span class="btn-text">生成分镜</span>
-                                <span class="btn-icon-right">→</span>
-                            </button>
+                    <!-- 选项：响应式网格 -->
+                    <div class="pb-options">
+                        <div class="pb-field">
+                            <span class="pb-field-label">🎬 视频模型</span>
+                            <select id="video-model" class="pb-select">
+                                <option value="seedance">Seedance 2.0</option>
+                                <option value="kling">Kling 3.0 Audio</option>
+                                <option value="veo">Veo 3.1</option>
+                                <option value="happyhorse">Happy Horse</option>
+                            </select>
                         </div>
+                        <div class="pb-field">
+                            <span class="pb-field-label">🎭 导演风格</span>
+                            <select id="director-style" class="pb-select">
+                                <option value="auto">自动匹配</option>
+                                <optgroup label="经典风格（结构化）">
+                                    <option value="hitchcock">希区柯克</option>
+                                    <option value="kubrick">库布里克</option>
+                                    <option value="anderson">韦斯·安德森</option>
+                                    <option value="scorsese">斯科塞斯</option>
+                                    <option value="cuaron">卡隆/卢贝兹基</option>
+                                </optgroup>
+                                <!-- 导演智囊团 31 位由 app.js 从 DIRECTOR_PROFILES 动态填充 -->
+                            </select>
+                        </div>
+                        <div class="pb-field">
+                            <span class="pb-field-label">👥 清晰人物数</span>
+                            <select id="character-count" class="pb-select">
+                                <option value="auto">自动识别</option>
+                                <option value="1">1人（最稳）</option>
+                                <option value="2">2人对话</option>
+                                <option value="3">3人对峙</option>
+                                <option value="crowd">群演背景模糊</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 开关 -->
+                    <div class="pb-checks">
+                        <label class="pb-check"><input type="checkbox" id="lock-continuity" checked><span>🔒 连续性锁定</span></label>
+                        <label class="pb-check"><input type="checkbox" id="lip-sync" checked><span>👄 台词口型控制</span></label>
+                        <label class="pb-check"><input type="checkbox" id="anti-collapse" checked><span>🛡️ 防崩约束</span></label>
+                    </div>
+
+                    <!-- 动作栏 -->
+                    <div class="pb-actionbar">
+                        <div class="pb-hint">按 Enter 生成 · Shift+Enter 换行</div>
+                        <button class="pb-ai-input-btn" id="btn-generate">
+                            <span class="pb-ai-sparkle">🎬</span>
+                            <span class="btn-text">生成分镜</span>
+                        </button>
                     </div>
                 </div>
 
