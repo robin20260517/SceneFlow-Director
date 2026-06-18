@@ -241,110 +241,101 @@ function doGenerate(cleanText, style, videoModel, characterCount, lockContinuity
     btn.classList.add('loading');
     btn.querySelector('.btn-text').textContent = 'AI 分析中';
 
-    // 检测用户是否标注了多个分镜
-    const multiShotPattern = /第[一二三四五六七八九十\d]+[个]?分镜|分镜[一二三四五六七八九十\d]+|镜头[一二三四五六七八九十\d]+|[1-9][.、]/;
-    const wantsMultiple = multiShotPattern.test(cleanText);
+    // 一次性结构化分镜（先剧情解析，再输出分镜计划）
 
     const options = { videoModel, characterCount, lipSync, lockContinuity, antiCollapse, directorStyle: style };
 
-    if (wantsMultiple) {
-        // 多分镜：拆分后逐个调 AI
-        const segments = shotEngine.smartSplit(cleanText);
-        callDeepseekMultiShot(segments, mentions, options).then(results => {
-            container.innerHTML = '';
-            results.forEach((res, i) => {
-                if (res.success) {
-                    container.innerHTML += `
-                        <div class="shot-card">
-                            <div class="shot-header">
-                                <div class="shot-number">${i + 1}</div>
-                                <span class="shot-type-badge narrative">分镜</span>
-                                <div class="shot-description">${segments[i]?.slice(0, 50) || ''}</div>
-                            </div>
-                            <div class="shot-prompt">
-                                <div class="shot-prompt-text">${res.prompt}</div>
-                                <button class="shot-prompt-copy" onclick="copyShotPrompt(this)">\ud83d\udccb 复制</button>
-                            </div>
-                        </div>`;
-                } else {
-                    container.innerHTML += `<div class="shot-card"><div class="shot-prompt"><div class="shot-prompt-text">AI 生成失败: ${res.error}</div></div></div>`;
-                }
-            });
-            outputArea.style.display = 'block';
-            btn.classList.remove('loading');
-            btn.querySelector('.btn-text').textContent = '生成分镜';
-            outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    } else {
-        // 单分镜：一次 AI 调用
-        callDeepseekAPI(cleanText, mentions, options).then(res => {
-            container.innerHTML = '';
-            if (res.success) {
-                container.innerHTML = `
-                    <div class="shot-card">
-                        <div class="shot-header">
-                            <div class="shot-number">1</div>
-                            <span class="shot-type-badge narrative">分镜</span>
-                            <div class="shot-description">${cleanText.slice(0, 60)}${cleanText.length > 60 ? '...' : ''}</div>
-                        </div>
-                        <div class="shot-prompt">
-                            <div class="shot-prompt-text">${res.prompt}</div>
-                            <button class="shot-prompt-copy" onclick="copyShotPrompt(this)">\ud83d\udccb 复制</button>
-                        </div>
-                    </div>`;
-            } else {
-                // AI 失败时 fallback 到本地引擎
-                container.innerHTML = `<div class="duo-notice"><span class="duo-notice-icon">\u26a0\ufe0f</span><span class="duo-notice-text">AI 连接失败 (${res.error})，已使用本地引擎</span></div>`;
-                renderSingleShotFallback(cleanText, style, videoModel, characterCount, lockContinuity, lipSync, antiCollapse, mentions, container);
-            }
-            outputArea.style.display = 'block';
-            btn.classList.remove('loading');
-            btn.querySelector('.btn-text').textContent = '生成分镜';
-            outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
+    generateShotPlan(cleanText, mentions, options).then(res => {
+        container.innerHTML = '';
+        if (res.local) {
+            container.innerHTML += `<div class="duo-notice"><span class="duo-notice-icon">⚠️</span><span class="duo-notice-text">AI 连接失败（${res.fallbackReason || ''}），已用本地运镜知识库生成结构化分镜</span></div>`;
+        }
+        container.innerHTML += renderSceneAnalysis(res.analysis || {}, cleanText);
+        container.innerHTML += `<div class="shot-plan-title">🎬 分镜计划 · 共 ${res.shots.length} 个镜头</div>`;
+        container.innerHTML += res.shots.map((s, i) => renderShotCard(s, i)).join('');
+        outputArea.style.display = 'block';
+        btn.classList.remove('loading');
+        btn.querySelector('.btn-text').textContent = '生成分镜';
+        outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 }
 
-// 本地引擎 fallback（AI 不可用时）
-function renderSingleShotFallback(cleanText, style, videoModel, characterCount, lockContinuity, lipSync, antiCollapse, mentions, container) {
-    const autoResult = shotEngine.generateShots(cleanText, style, { videoModel, characterCount, lockContinuity, lipSync, antiCollapse, mentions });
-    const shot = autoResult.shots[0];
-    if (!shot) return;
+function escapeHtml(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function asList(v) {
+    if (Array.isArray(v)) return v.join(' · ');
+    return v || '';
+}
 
-    const parts = [];
-    parts.push(`【场景】${cleanText}`);
-    if (mentions.movements.length > 0) {
-        parts.push(`【运镜】${mentions.movements[0].cn}: ${mentions.movements[0].seedance || mentions.movements[0].desc}`);
-    } else if (shot.movement) {
-        parts.push(`【运镜】${shot.movement.cn}: ${shot.movement.seedance || shot.movement.desc || ''}`);
-    }
-    if (mentions.colors.length > 0) {
-        parts.push(`【调色】${mentions.colors[0].name}: ${mentions.colors[0].prompt}`);
-    } else if (shot.color) {
-        parts.push(`【调色】${shot.color.name}: ${shot.color.prompt}`);
-    }
-    if (mentions.expressions.length > 0) parts.push(`【面部表情】${mentions.expressions.map(e => e.prompt).join(' ')}`);
-    if (mentions.bodies.length > 0) parts.push(`【肢体动作】${mentions.bodies.map(e => e.prompt).join(' ')}`);
-    if (mentions.bloods.length > 0) parts.push(`【面部血色】${mentions.bloods.map(e => e.prompt).join(' ')}`);
-    parts.push(`【景别】${shot.shotSize.cn}`);
-    parts.push(`【音效】${shot.soundDesign || shot.sound || ''}`);
-    parts.push(`【皮肤/面部】${shot.skin}`);
+// 第一段：剧情解析面板
+function renderSceneAnalysis(a, cleanText) {
+    const rows = [
+        ['剧情类型', a['剧情类型']],
+        ['场景地点', a['场景地点']],
+        ['人物数量', a['人物数量']],
+        ['镜头目的', asList(a['镜头目的'])],
+        ['动作节点', asList(a['动作节点'])]
+    ];
+    const rowHtml = rows.filter(r => r[1]).map(r =>
+        `<div class="sa-row"><span class="sa-key">${r[0]}</span><span class="sa-val">${escapeHtml(r[1])}</span></div>`).join('');
+    const curve = a['情绪曲线'] ? `<div class="sa-curve">${escapeHtml(a['情绪曲线']).split(/\s*[→>]\s*/).filter(Boolean).map(nd => `<span class="sa-node">${nd}</span>`).join('<span class="sa-arrow">→</span>')}</div>` : '';
+    return `
+        <div class="scene-analysis">
+            <div class="sa-head"><span class="sa-badge">剧情解析</span><span class="sa-src">${escapeHtml((cleanText || '').slice(0, 48))}${cleanText && cleanText.length > 48 ? '…' : ''}</span></div>
+            <div class="sa-grid">${rowHtml}</div>
+            ${curve ? `<div class="sa-row sa-curve-row"><span class="sa-key">情绪曲线</span>${curve}</div>` : ''}
+        </div>`;
+}
 
-    const model = VIDEO_MODELS[videoModel];
-    parts.push(`【视频模型】${model.name}`);
-    if (lockContinuity) parts.push(`【连续性】角色/服装/光线全程一致`);
-    if (antiCollapse) parts.push(`【防崩】禁止人物消失/替换/跳切/照片感`);
+// 第二段：单个分镜卡片（九字段 + 分层示意图）
+function renderShotCard(s, i) {
+    const n = s['镜头'] || (i + 1);
+    const size = s['景别'] || '', angle = s['机位'] || '', move = s['运镜'] || '';
+    const diagram = getMotionIconByName(move);
+    const fields = [
+        ['人物表情', s['人物表情']],
+        ['肢体动作', s['肢体动作']],
+        ['灯光', s['灯光']],
+        ['声音', s['声音']],
+        ['禁止项', s['禁止项']]
+    ];
+    const fieldHtml = fields.filter(f => f[1]).map(f =>
+        `<div class="sf-row ${f[0] === '禁止项' ? 'sf-forbid' : ''}"><span class="sf-key">${f[0]}</span><span class="sf-val">${escapeHtml(f[1])}</span></div>`).join('');
+    const en = s['英文视频提示词'] || '';
 
-    container.innerHTML += `
-        <div class="shot-card">
+    const fullText = [
+        `镜头 ${n}`,
+        `【景别】${size}　【机位】${angle}　【运镜】${move}`,
+        s['人物表情'] ? `【人物表情】${s['人物表情']}` : '',
+        s['肢体动作'] ? `【肢体动作】${s['肢体动作']}` : '',
+        s['灯光'] ? `【灯光】${s['灯光']}` : '',
+        s['声音'] ? `【声音】${s['声音']}` : '',
+        en ? `【英文视频提示词】${en}` : '',
+        s['禁止项'] ? `【禁止项】${s['禁止项']}` : ''
+    ].filter(Boolean).join('\n');
+
+    return `
+        <div class="shot-card shot-card-v2">
             <div class="shot-header">
-                <div class="shot-number">1</div>
-                <span class="shot-type-badge narrative">分镜</span>
-                <div class="shot-description">${cleanText.slice(0, 60)}</div>
+                <div class="shot-number">${n}</div>
+                <div class="shot-badges">
+                    <span class="shot-badge sb-size">${escapeHtml(size)}</span>
+                    <span class="shot-badge sb-angle">${escapeHtml(angle)}</span>
+                    <span class="shot-badge sb-move">${escapeHtml(move)}</span>
+                    ${s['目的'] ? `<span class="shot-badge sb-purpose">${escapeHtml(s['目的'])}</span>` : ''}
+                </div>
             </div>
+            <div class="shot-body">
+                <div class="shot-diagram">${diagram}<div class="shot-diagram-cap">${escapeHtml(move)}</div></div>
+                <div class="shot-fields">${fieldHtml}</div>
+            </div>
+            ${en ? `<div class="shot-en"><span class="shot-en-tag">EN</span><span class="shot-en-text">${escapeHtml(en)}</span></div>` : ''}
             <div class="shot-prompt">
-                <div class="shot-prompt-text">${parts.join('\n')}</div>
-                <button class="shot-prompt-copy" onclick="copyShotPrompt(this)">\ud83d\udccb 复制</button>
+                <div class="shot-prompt-text" style="display:none">${escapeHtml(fullText)}</div>
+                <button class="shot-prompt-copy" onclick="copyShotPrompt(this)">📋 复制此镜头</button>
             </div>
         </div>`;
 }

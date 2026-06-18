@@ -852,3 +852,69 @@ body {
     .hero-title { font-size: 24px; }
     #panel-expressions .library-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
+
+/* ============================================
+   剧情解析面板 + 结构化分镜卡片（v2）
+   ============================================ */
+.scene-analysis {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--duo-blue);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+}
+.sa-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.sa-badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full); background: rgba(28,176,246,0.15); color: var(--duo-blue); }
+.sa-src { font-size: 12px; color: var(--text-muted); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 18px; }
+.sa-row { display: flex; gap: 8px; font-size: 13px; align-items: baseline; }
+.sa-key { flex: 0 0 auto; color: var(--text-muted); font-weight: 700; min-width: 56px; }
+.sa-val { color: var(--text-primary); }
+.sa-curve-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); }
+.sa-curve { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.sa-node { padding: 2px 10px; border-radius: var(--radius-full); background: rgba(88,204,2,0.12); color: var(--duo-green); font-size: 12px; font-weight: 700; }
+.sa-arrow { color: var(--text-muted); font-size: 12px; }
+
+.shot-plan-title { font-size: 15px; font-weight: 900; color: var(--text-primary); margin: 8px 0 14px; }
+
+.shot-card-v2 {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    transition: var(--transition);
+}
+.shot-card-v2:hover { border-color: var(--duo-blue); box-shadow: var(--shadow-md); }
+.shot-card-v2 .shot-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.shot-card-v2 .shot-number { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; background: var(--duo-blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+.shot-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.shot-badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full); }
+.sb-size { background: rgba(88,204,2,0.15); color: var(--duo-green); }
+.sb-angle { background: rgba(255,150,0,0.15); color: var(--duo-orange, #ff9600); }
+.sb-move { background: rgba(28,176,246,0.15); color: var(--duo-blue); }
+.sb-purpose { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+
+.shot-body { display: grid; grid-template-columns: 148px 1fr; gap: 16px; align-items: start; }
+.shot-diagram { text-align: center; }
+.shot-diagram-cap { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 700; }
+.shot-fields { display: flex; flex-direction: column; gap: 7px; }
+.sf-row { display: flex; gap: 8px; font-size: 13px; line-height: 1.5; }
+.sf-key { flex: 0 0 60px; color: var(--text-muted); font-weight: 700; }
+.sf-val { color: var(--text-primary); flex: 1; }
+.sf-forbid .sf-key { color: var(--duo-red, #ff4b4b); }
+.sf-forbid .sf-val { color: var(--text-secondary); }
+
+.shot-en { display: flex; gap: 8px; align-items: flex-start; margin-top: 14px; padding: 10px 12px; background: rgba(0,0,0,0.18); border-radius: var(--radius-sm); }
+.shot-en-tag { flex: 0 0 auto; font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 4px; background: var(--duo-blue); color: #fff; }
+.shot-en-text { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+.shot-card-v2 .shot-prompt { margin-top: 12px; text-align: right; }
+.shot-card-v2 .shot-prompt-copy { background: rgba(28,176,246,0.12); color: var(--duo-blue); border: 1px solid rgba(28,176,246,0.3); border-radius: var(--radius-full); padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+.shot-card-v2 .shot-prompt-copy:hover { background: var(--duo-blue); color: #fff; }
+
+@media (max-width: 600px) {
+    .shot-body { grid-template-columns: 1fr; }
+    .shot-diagram .sd-box { width: 150px; height: 96px; }
+}

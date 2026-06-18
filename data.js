@@ -872,3 +872,195 @@ const EXPRESSION_LIBRARY = {
         ]
     }
 };
+
+
+// ============================================================================
+// === 结构化运镜知识库 CINEMA_KB ===
+// 源自 film-cinematography-master skill，拆成结构化数据供 AI 引擎检索
+// 七大结构：shotSizes / cameraAngles / cameraMoves / compositionRules
+//          directorStyles / emotionToCamera / sceneTypeToShotPlan
+// ============================================================================
+
+// 1) 景别 — 每个景别绑定「用途」，对应剧情解析的镜头目的
+const KB_SHOT_SIZES = {
+    '大远景': { en: 'Extreme Long Shot (ELS)', purpose: '建立环境', use: '交代地点/世界观/季节氛围，人物极小如蚁', diagram: 'els', prompt: '大远景，人物在画面中极小，环境占据绝大部分，天地苍茫，建立地理与世界观' },
+    '远景':   { en: 'Long Shot (LS)', purpose: '建立环境', use: '可辨认人物轮廓与行进方向，人与环境的关系', diagram: 'ls', prompt: '远景，人物完整但较小，环境主导，表现人与空间的关系、孤独感、方向' },
+    '全景':   { en: 'Full Shot (FS)', purpose: '展示动作', use: '人物从头到脚，交代整体状态与肢体语言', diagram: 'fs', prompt: '全景，人物从头到脚完整呈现，看清站姿、服装、肢体语言' },
+    '中全景': { en: 'Medium Full Shot (MFS)', purpose: '展示动作', use: '膝盖以上，走动、互动、站位关系', diagram: 'mfs', prompt: '中全景，膝盖以上，看清大部分肢体动作与站位关系' },
+    '中景':   { en: 'Medium Shot (MS)', purpose: '展示动作', use: '腰部以上，上半身动作、手势、道具互动，最常用叙事景别', diagram: 'ms', prompt: '中景，腰部以上，重点上半身动作、手势、道具互动' },
+    '中近景': { en: 'Medium Close-Up (MCU)', purpose: '放大情绪', use: '胸部以上，面部表情清晰兼留少量环境，对话主力景别', diagram: 'mcu', prompt: '中近景，胸部以上，面部表情清晰，保留少量肩部与环境信息' },
+    '近景':   { en: 'Close-Up (CU)', purpose: '放大情绪', use: '面部为主，眼神/嘴唇/汗珠等微表情，情绪变化核心', diagram: 'cu', prompt: '近景，面部占据主体，清晰可见眼神、嘴唇、汗珠等微表情' },
+    '特写':   { en: 'Big Close-Up (BCU)', purpose: '强化压迫', use: '面部局部放大，强调情绪爆发点与心理压迫', diagram: 'bcu', prompt: '特写，面部局部放大（眼/唇/手），强调情绪爆发点与心理压迫' },
+    '大特写': { en: 'Extreme Close-Up (ECU)', purpose: '强化压迫', use: '瞳孔/指尖/扳机等单一细节极致聚焦', diagram: 'ecu', prompt: '大特写，极度放大单一细节（瞳孔/指尖/扳机），心理压迫到顶点' },
+    '微距':   { en: 'Macro Shot', purpose: '关键物件', use: '汗珠折射/毛孔/划痕等超微观，强调关键物件', diagram: 'macro', prompt: '微距，超微观（汗珠折射/毛孔/金属划痕），放大关键物件细节' }
+};
+
+// 2) 机位/角度 — 绑定「权力感/脆弱感/对峙」等心理语义
+const KB_CAMERA_ANGLES = {
+    '平视':   { en: 'Eye Level', feel: '中性客观', use: '与角色平等对话，无情绪暗示', diagram: 'eye_level', prompt: '平视，摄影机与人物眼睛同高，中性客观' },
+    '仰拍':   { en: 'Low Angle', feel: '权力感', use: '人物高大威严有压迫力，表现权力/英雄/威胁', diagram: 'low_angle', prompt: '低角度仰拍，摄影机在人物下方向上，人物高大威严，强化权力与压迫' },
+    '俯拍':   { en: 'High Angle', feel: '脆弱感', use: '人物渺小无助被监控，表现脆弱/失势', diagram: 'overhead', prompt: '高角度俯拍，摄影机在人物上方向下，人物渺小无助，强化脆弱与被压制' },
+    '过肩':   { en: 'Over-the-Shoulder', feel: '对峙', use: '前景留肩，焦点对准对方，建立对话/对峙空间', diagram: 'ots', prompt: '过肩，前景保留一人肩膀轮廓，焦点对准画面深处的另一人，建立对峙空间' },
+    '侧面':   { en: 'Profile', feel: '内省/旁观', use: '纯侧面90度，思考、压抑、平行感', diagram: 'side_view', prompt: '纯侧面90度，展现轮廓与思考状态，内省压抑' },
+    '背影':   { en: 'Back View', feel: '神秘/离去', use: '不暴露表情，孤独、决心、进入未知', diagram: 'back_view', prompt: '背影，摄影机对准后背，跟随视线进入未知，孤独与决心' },
+    '主观视角': { en: 'POV', feel: '极致代入', use: '完全模拟角色双眼所见', diagram: 'pov', prompt: '主观视角，完全模拟角色双眼所见，最强代入，轻微自然摆动' },
+    '鸟瞰':   { en: "Bird's Eye View", feel: '渺小无助', use: '完全垂直俯瞰，命运感', diagram: 'overhead', prompt: '鸟瞰，完全垂直向下俯瞰，人物如棋子般渺小无助' }
+};
+
+// 3) 运镜 — 统一表，每条带 diagram(分层示意id) + 触发场景 + 英文
+const KB_CAMERA_MOVES = {
+    '固定镜头':   { en: 'Static Shot', diagram: 'static', trigger: '情绪崩溃定镜、对称稳定', effect: '安定、聚焦、让表演说话', prompt: '机位完全固定，构图稳定，让人物表演主导画面' },
+    '缓慢推镜':   { en: 'Slow Push In', diagram: 'push', trigger: '紧张靠近、神圣感、情绪递进', effect: '不可阻挡地逼近，累积压迫与神圣', prompt: '镜头以几乎不可察觉的速度沿Z轴缓慢推进，景深渐浅，累积压迫感' },
+    '快速推近':   { en: 'Crash Push', diagram: 'push', trigger: '震撼登场、突发冲击', effect: '猛烈逼近的视觉撞击', prompt: '镜头快速前冲逼近主体，强烈视觉撞击' },
+    '拉镜':       { en: 'Pull Out', diagram: 'pull', trigger: '信息揭露、孤立/解脱', effect: '揭示环境、人物渐小', prompt: '镜头向后拉开，由局部扩展到大场景，揭示环境、突显孤立' },
+    '横移':       { en: 'Lateral Track', diagram: 'lateral', trigger: '进入场景、画卷式展示', effect: '流动感、持续展现背景', prompt: '镜头垂直于主体平滑横移，保持固定距离，画卷式展开空间' },
+    '摇镜':       { en: 'Pan', diagram: 'pan', trigger: '揭示空间、追随动作', effect: '从容展示大环境', prompt: '机位不动水平旋转，从容揭示空间地理' },
+    '跟拍':       { en: 'Follow Shot', diagram: 'follow', trigger: '进入场景、与角色同行', effect: '沉浸感、并肩前行', prompt: '稳定器平滑跟随主体移动，保持相对距离，沉浸代入' },
+    '手持跟拍':   { en: 'Handheld Follow', diagram: 'handheld_follow', trigger: '逃跑追逐、混乱失控', effect: '纪实感、紧迫、失控', prompt: '手持跟随主体奔跑，刻意不规则晃动与呼吸感，制造失控紧迫' },
+    '手持呼吸感': { en: 'Handheld Breathing', diagram: 'handheld', trigger: '情绪崩溃、亲密连接', effect: '微颤临场，脆弱真实', prompt: '轻微手持浮动如呼吸节律，贴近人物的脆弱与真实' },
+    '低角度仰推': { en: 'Low Angle Push', diagram: 'low_push', trigger: '震撼登场、英雄气场', effect: '伟岸登场+逼近气场', prompt: '低角度仰拍同时缓慢推近，人物伟岸登场，气场逼人' },
+    '升镜':       { en: 'Crane Up', diagram: 'crane_up', trigger: '宏大揭示、疏离', effect: '削弱主体、上帝视角', prompt: '镜头从低处缓慢升起，越过前景揭示后方大场景，宏大疏离' },
+    '降镜':       { en: 'Crane Down', diagram: 'crane_down', trigger: '俯瞰压制、发现', effect: '强化主体、压迫', prompt: '镜头从高处朝下降落，视线压向地面，俯瞰压制' },
+    '环绕':       { en: '360° Orbit', diagram: 'orbit', trigger: '震撼登场、英雄定格', effect: '展现空间关系与气势', prompt: '镜头环绕主体匀速旋转，等距固定，展现空间关系与动态气势' },
+    '滑动变焦':   { en: 'Dolly Zoom', diagram: 'dolly_zoom', trigger: '恐惧、认知颠覆、揭示震惊', effect: '眩晕、心理崩溃具象化', prompt: '镜头前推同时反向变焦，主体大小不变而背景剧烈变形，制造眩晕不安' },
+    '荷兰角':     { en: 'Dutch Angle', diagram: 'dutch', trigger: '不安、精神失衡', effect: '混乱、心理失衡', prompt: '画面水平线倾斜，制造不稳定与诡异心理' },
+    '甩镜转场':   { en: 'Whip Pan', diagram: 'whip', trigger: '信息揭露、高能转场', effect: '动态模糊衔接、迷失', prompt: '镜头朝一个方向急速甩动，动态模糊后衔接下一画面' },
+    '焦点转移':   { en: 'Rack Focus', diagram: 'rack_focus', trigger: '信息揭露、视线引导', effect: '从前景拉到后景，揭示关键', prompt: '焦点从前景目标转移到后景目标，引导视线、揭示信息' },
+    '遮挡转场':   { en: 'Wipe-by Transition', diagram: 'occlusion', trigger: '信息揭露、场景切换', effect: '前景遮挡瞬间切换时空', prompt: '前景物体划过完全遮挡画面，借遮挡瞬间切换场景或时空' },
+    '过肩正反打': { en: 'Shot-Reverse-Shot', diagram: 'ots', trigger: '双人对话、对峙', effect: '标准对话镜头、轴线规则', prompt: '越过A肩看B、再反打越过B肩看A，保持180度轴线，建立对话空间' }
+};
+
+// 4) 构图/对峙规则 — 叙事情境 → 镜头语言
+const KB_COMPOSITION_RULES = {
+    '建立环境': { shotSize: ['大远景', '远景'], move: '摇镜', note: '大景别交代地点与世界观' },
+    '人物动作关系': { shotSize: ['全景', '中景'], move: '横移', note: '中大景别展示动作与人物站位' },
+    '情绪变化': { shotSize: ['近景'], move: '缓慢推镜', note: '近景捕捉表情变化' },
+    '心理压迫': { shotSize: ['特写', '大特写'], move: '缓慢推镜', note: '特写+逼近制造压迫' },
+    '关键物件': { shotSize: ['微距', '大特写'], move: '焦点转移', note: '微距放大关键道具' },
+    '权力感': { angle: '仰拍', move: '低角度仰推', note: '低角度抬升人物气场' },
+    '脆弱感': { angle: '俯拍', move: '降镜', note: '高角度俯压人物' },
+    '对峙': { angle: '过肩', move: '过肩正反打', note: '过肩/正反打+轴线规则' },
+    '混乱': { move: '手持跟拍', note: '手持跟拍制造失控' },
+    '神圣感': { move: '缓慢推镜', note: '缓慢推镜累积神圣' },
+    '恐惧感': { move: '缓慢推镜', extra: '浅景深 + 缓慢靠近', note: '缓慢靠近+浅景深逼出恐惧' }
+};
+
+// 5) 导演风格库 — 直接复用上方完整模板 DIRECTOR_STYLES
+const KB_DIRECTOR_STYLES = DIRECTOR_STYLES;
+
+// 6) 情绪 → 镜头/表演 映射（剧情解析的核心查表）
+const KB_EMOTION_TO_CAMERA = {
+    '平静': { shotSize: '中景', angle: '平视', move: '固定镜头', light: '均匀柔光、暖调自然光', sound: '低弱环境声、轻呼吸', expr: 'cold_stare', body: 'controlled_still' },
+    '紧张': { shotSize: '近景', angle: '平视', move: '缓慢推镜', light: '单侧硬光、阴影渐重', sound: '低频嗡鸣渐强、心跳隐现', expr: 'micro_fear', body: 'nervous_hands' },
+    '压迫': { shotSize: '特写', angle: '仰拍', move: '低角度仰推', light: '顶光下压、面部半明半暗', sound: '低频持续、脚步逼近', expr: 'power_composure', body: 'power_lean' },
+    '恐惧': { shotSize: '特写', angle: '俯拍', move: '滑动变焦', light: '低照度、浅景深虚化背景', sound: '尖锐弦乐刺入、骤然静默', expr: 'micro_fear', body: 'defensive_cross' },
+    '愤怒': { shotSize: '近景', angle: '平视', move: '快速推近', light: '高对比硬光、暖红溢出', sound: '低吼、桌面重击', expr: 'suppressed_anger', body: 'fist_clench' },
+    '爆发': { shotSize: '特写', angle: '平视', move: '手持呼吸感', light: '强光骤变、血色泛红', sound: '情绪声爆裂、玻璃碎裂', expr: 'shock', body: 'threat_stand' },
+    '崩溃': { shotSize: '近景', angle: '俯拍', move: '固定镜头', light: '冷调低饱和、面部失光', sound: '抽泣、环境抽离静默', expr: 'grief', body: 'collapse_lean' },
+    '疲惫': { shotSize: '近景', angle: '平视', move: '固定镜头', light: '灰暗无光、眼下阴影', sound: '缓慢呼吸、远处嘈杂模糊', expr: 'vulnerability', body: 'head_drop' },
+    '伪装冷静': { shotSize: '中近景', angle: '平视', move: '缓慢推镜', light: '均匀光下藏微汗光泽', sound: '克制呼吸、手指轻敲', expr: 'fake_smile', body: 'controlled_still' },
+    '余韵': { shotSize: '远景', angle: '平视', move: '拉镜', light: '渐暗或晨光、留白', sound: '环境声回归、余音渐远', expr: 'relief', body: 'exit_turn' },
+    '亲密': { shotSize: '近景', angle: '平视', move: '手持呼吸感', light: '柔焦暖光、浅景深', sound: '细微呼吸、布料摩擦', expr: 'vulnerability', body: 'nervous_hands' },
+    '宏大': { shotSize: '大远景', angle: '仰拍', move: '升镜', light: '广角自然光、天光主导', sound: '宏大低频、风声空间感', expr: 'determination', body: 'power_lean' },
+    '神圣': { shotSize: '中景', angle: '仰拍', move: '缓慢推镜', light: '逆光圣光、轮廓发光', sound: '圣咏式延音、空间回响', expr: 'determination', body: 'controlled_still' },
+    '混乱': { shotSize: '中景', angle: '平视', move: '手持跟拍', light: '频闪/晃动光、忽明忽暗', sound: '嘈杂叠加、急促脚步', expr: 'shock', body: 'threat_stand' }
+};
+
+// 7) 剧情类型 + 场景 → 分镜计划模板（先分析后输出的"骨架"）
+//    每个 shot = { 景别, 机位, 运镜, 目的, 情绪 }
+const KB_SCENE_TYPE_TO_SHOT_PLAN = {
+    '动作': {
+        label: '动作', emotionCurve: '平静 → 紧张 → 爆发 → 余韵',
+        shots: [
+            { 景别: '大远景', 机位: '平视', 运镜: '摇镜', 目的: '建立环境', 情绪: '平静' },
+            { 景别: '全景', 机位: '平视', 运镜: '跟拍', 目的: '人物动作关系', 情绪: '紧张' },
+            { 景别: '中景', 机位: '低角度仰拍', 运镜: '低角度仰推', 目的: '震撼登场', 情绪: '压迫' },
+            { 景别: '近景', 机位: '平视', 运镜: '快速推近', 目的: '情绪变化', 情绪: '愤怒' },
+            { 景别: '中景', 机位: '平视', 运镜: '手持跟拍', 目的: '混乱', 情绪: '混乱' },
+            { 景别: '特写', 机位: '平视', 运镜: '固定镜头', 目的: '强化压迫', 情绪: '爆发' }
+        ]
+    },
+    '对话': {
+        label: '对话', emotionCurve: '平静 → 紧张 → 对峙 → 余韵',
+        shots: [
+            { 景别: '全景', 机位: '平视', 运镜: '横移', 目的: '建立环境', 情绪: '平静' },
+            { 景别: '中景', 机位: '平视', 运镜: '跟拍', 目的: '人物动作关系', 情绪: '平静' },
+            { 景别: '中近景', 机位: '过肩', 运镜: '过肩正反打', 目的: '对峙', 情绪: '紧张' },
+            { 景别: '近景', 机位: '平视', 运镜: '缓慢推镜', 目的: '情绪变化', 情绪: '伪装冷静' },
+            { 景别: '特写', 机位: '平视', 运镜: '固定镜头', 目的: '强化压迫', 情绪: '爆发' }
+        ]
+    },
+    '悬疑': {
+        label: '悬疑', emotionCurve: '平静 → 紧张 → 揭示 → 余韵',
+        shots: [
+            { 景别: '远景', 机位: '俯拍', 运镜: '缓慢推镜', 目的: '建立环境', 情绪: '平静' },
+            { 景别: '中景', 机位: '侧面', 运镜: '横移', 目的: '人物动作关系', 情绪: '紧张' },
+            { 景别: '近景', 机位: '平视', 运镜: '缓慢推镜', 目的: '心理压迫', 情绪: '紧张' },
+            { 景别: '微距', 机位: '平视', 运镜: '焦点转移', 目的: '关键物件', 情绪: '紧张' },
+            { 景别: '中景', 机位: '平视', 运镜: '遮挡转场', 目的: '信息揭露', 情绪: '爆发' }
+        ]
+    },
+    '恐怖': {
+        label: '恐怖', emotionCurve: '平静 → 不安 → 恐惧 → 惊吓',
+        shots: [
+            { 景别: '大远景', 机位: '平视', 运镜: '缓慢推镜', 目的: '建立环境', 情绪: '平静' },
+            { 景别: '中景', 机位: '背影', 运镜: '跟拍', 目的: '神圣感', 情绪: '紧张' },
+            { 景别: '近景', 机位: '平视', 运镜: '滑动变焦', 目的: '恐惧感', 情绪: '恐惧' },
+            { 景别: '特写', 机位: '俯拍', 运镜: '缓慢推镜', 目的: '心理压迫', 情绪: '恐惧' },
+            { 景别: '大特写', 机位: '平视', 运镜: '快速推近', 目的: '强化压迫', 情绪: '爆发' }
+        ]
+    },
+    '情绪爆发': {
+        label: '情绪爆发', emotionCurve: '压抑 → 临界 → 爆发 → 崩溃',
+        shots: [
+            { 景别: '中近景', 机位: '平视', 运镜: '缓慢推镜', 目的: '情绪变化', 情绪: '伪装冷静' },
+            { 景别: '近景', 机位: '平视', 运镜: '缓慢推镜', 目的: '心理压迫', 情绪: '紧张' },
+            { 景别: '特写', 机位: '平视', 运镜: '手持呼吸感', 目的: '强化压迫', 情绪: '爆发' },
+            { 景别: '近景', 机位: '俯拍', 运镜: '固定镜头', 目的: '情绪变化', 情绪: '崩溃' },
+            { 景别: '远景', 机位: '平视', 运镜: '拉镜', 目的: '信息揭露', 情绪: '余韵' }
+        ]
+    },
+    '广告CTA': {
+        label: '广告 CTA', emotionCurve: '吸引 → 痛点 → 产品 → 行动号召',
+        shots: [
+            { 景别: '中景', 机位: '平视', 运镜: '横移', 目的: '建立环境', 情绪: '平静' },
+            { 景别: '近景', 机位: '平视', 运镜: '缓慢推镜', 目的: '情绪变化', 情绪: '紧张' },
+            { 景别: '微距', 机位: '平视', 运镜: '焦点转移', 目的: '关键物件', 情绪: '亲密' },
+            { 景别: '全景', 机位: '仰拍', 运镜: '环绕', 目的: '震撼登场', 情绪: '宏大' },
+            { 景别: '特写', 机位: '平视', 运镜: '快速推近', 目的: '强化压迫', 情绪: '爆发' }
+        ]
+    },
+    '世界杯冲突': {
+        label: '世界杯冲突', emotionCurve: '蓄势 → 对峙 → 爆发 → 沸腾',
+        shots: [
+            { 景别: '大远景', 机位: '鸟瞰', 运镜: '升镜', 目的: '建立环境', 情绪: '宏大' },
+            { 景别: '全景', 机位: '低角度仰拍', 运镜: '跟拍', 目的: '人物动作关系', 情绪: '紧张' },
+            { 景别: '中近景', 机位: '过肩', 运镜: '过肩正反打', 目的: '对峙', 情绪: '愤怒' },
+            { 景别: '特写', 机位: '平视', 运镜: '快速推近', 目的: '情绪变化', 情绪: '爆发' },
+            { 景别: '中景', 机位: '平视', 运镜: '手持跟拍', 目的: '混乱', 情绪: '混乱' },
+            { 景别: '微距', 机位: '平视', 运镜: '焦点转移', 目的: '关键物件', 情绪: '爆发' }
+        ]
+    }
+};
+
+// 表情/肢体库映射（情绪 → 微表情 + 肢体），供 AI 与本地引擎查表
+const KB_EMOTION_PERFORMANCE = {
+    '愤怒': { face: '下颌绷紧、鼻翼扩张、眼神锁定', body: '握拳、上身前压、肩膀展开', exprId: 'suppressed_anger', bodyId: 'fist_clench' },
+    '恐惧': { face: '瞳孔放大、嘴唇微张、喉结吞咽', body: '肩膀内收、双臂防御交叉、身体后撤', exprId: 'micro_fear', bodyId: 'defensive_cross' },
+    '压迫': { face: '身体前倾、下巴微低、眼神不眨', body: '撑桌前压、占据空间、纹丝不动', exprId: 'power_composure', bodyId: 'power_lean' },
+    '疲惫': { face: '眼袋明显、眨眼缓慢、目光涣散', body: '肩膀下沉、深陷椅背、垂头', exprId: 'vulnerability', bodyId: 'head_drop' },
+    '伪装冷静': { face: '嘴角僵硬、呼吸浅、笑不到眼底', body: '手指轻敲、身体克制静止', exprId: 'fake_smile', bodyId: 'controlled_still' }
+};
+
+// 统一导出对象，供 ai-engine.js / app.js 引用
+const CINEMA_KB = {
+    shotSizes: KB_SHOT_SIZES,
+    cameraAngles: KB_CAMERA_ANGLES,
+    cameraMoves: KB_CAMERA_MOVES,
+    compositionRules: KB_COMPOSITION_RULES,
+    directorStyles: KB_DIRECTOR_STYLES,
+    emotionToCamera: KB_EMOTION_TO_CAMERA,
+    sceneTypeToShotPlan: KB_SCENE_TYPE_TO_SHOT_PLAN,
+    emotionPerformance: KB_EMOTION_PERFORMANCE
+};
+if (typeof window !== 'undefined') window.CINEMA_KB = CINEMA_KB;
