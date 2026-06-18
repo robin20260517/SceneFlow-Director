@@ -59,14 +59,14 @@
                                     <label>🎭 导演风格</label>
                                     <select id="director-style">
                                         <option value="auto">自动匹配</option>
-                                        <option value="hitchcock">希区柯克</option>
-                                        <option value="kubrick">库布里克</option>
-                                        <option value="wong">王家卫</option>
-                                        <option value="fincher">大卫·芬奇</option>
-                                        <option value="anderson">韦斯·安德森</option>
-                                        <option value="scorsese">斯科塞斯</option>
-                                        <option value="to">杜琪峰</option>
-                                        <option value="cuaron">卡隆/卢贝兹基</option>
+                                        <optgroup label="经典风格（结构化）">
+                                            <option value="hitchcock">希区柯克</option>
+                                            <option value="kubrick">库布里克</option>
+                                            <option value="anderson">韦斯·安德森</option>
+                                            <option value="scorsese">斯科塞斯</option>
+                                            <option value="cuaron">卡隆/卢贝兹基</option>
+                                        </optgroup>
+                                        <!-- 导演智囊团 31 位由 app.js 从 DIRECTOR_PROFILES 动态填充 -->
                                     </select>
                                 </div>
                                 <div class="control-item">
@@ -186,6 +186,7 @@
     </div>
 
     <script src="data.js"></script>
+    <script src="directors.js"></script>
     <script src="engine.js"></script>
     <script src="ai-engine.js"></script>
     <script src="motion-icons.js"></script>

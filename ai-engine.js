@@ -132,7 +132,18 @@ function buildStructuredSystemPrompt(options) {
     if (globalForbid.length) p += `\n【全局禁止项（每个镜头的"禁止项"都应涵盖）】${globalForbid.join('；')}`;
 
     // 导演风格注入
-    if (directorStyle && directorStyle !== 'auto' && typeof DIRECTOR_STYLES !== 'undefined' && DIRECTOR_STYLES[directorStyle]) {
+    if (directorStyle && directorStyle !== 'auto' && typeof DIRECTOR_PROFILES !== 'undefined' && DIRECTOR_PROFILES[directorStyle]) {
+        // 优先：整篇导演风格论文注入（来自导演智囊团 31 位）
+        let essay = DIRECTOR_PROFILES[directorStyle];
+        const MAX = 4200; // 控制 token，截到核心创作思想/美学/叙事部分
+        if (essay.length > MAX) essay = essay.slice(0, MAX) + '\n……（节选）';
+        p += `\n\n## 导演风格约束：你必须化身导演「${directorStyle}」，用其视觉语言与叙事观重新诠释全部镜头。
+以下是该导演的完整风格档案，所有镜头的景别/机位/运镜/灯光/声音/表情都要贴合其美学：
+"""
+${essay}
+"""
+注意：即使剧情是日常/温馨内容，也要用 ${directorStyle} 的方式重新诠释。`;
+    } else if (directorStyle && directorStyle !== 'auto' && typeof DIRECTOR_STYLES !== 'undefined' && DIRECTOR_STYLES[directorStyle]) {
         const ds = DIRECTOR_STYLES[directorStyle];
         p += `\n\n## 导演风格约束：以「${ds.name}」的视觉语言重新诠释全部镜头
 - 风格：${ds.signature}；调色：${ds.colorTone}

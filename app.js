@@ -4,6 +4,7 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    initDirectorOptions();
     initTabs();
     initGenerate();
     initLibrary();
@@ -11,6 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     initExpressions();
     initAtMention();
 });
+
+// 把 31 位导演（DIRECTOR_PROFILES）填进导演下拉框
+function initDirectorOptions() {
+    const sel = document.getElementById('director-style');
+    if (!sel || typeof DIRECTOR_PROFILES === 'undefined') return;
+    const group = document.createElement('optgroup');
+    group.label = `导演智囊团 · ${Object.keys(DIRECTOR_PROFILES).length} 位（论文注入）`;
+    Object.keys(DIRECTOR_PROFILES).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        group.appendChild(opt);
+    });
+    sel.appendChild(group);
+}
 
 // ===== Tab 切换 =====
 function initTabs() {
