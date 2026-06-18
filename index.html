@@ -128,63 +128,48 @@
                     <p class="hero-subtitle">海内 / 海外双模式 · 创作方案 + 角色 + 分集目录 + 前几集完整剧本（Claude 4.6）</p>
                 </div>
 
-                <div class="input-area">
-                    <div class="input-wrapper">
-                        <textarea id="script-idea" rows="3" placeholder="例：被豪门退婚的废柴少爷，其实是隐藏的商业战神，三年后携百亿资本归来打脸全家..."></textarea>
+                <div class="pb-studio">
+                    <!-- 灵感输入：玻璃质感 composer -->
+                    <div class="pb-composer">
+                        <label class="pb-composer-label" for="script-idea">💡 你的故事灵感 —— 一句话就够，AI 帮你写完整剧本</label>
+                        <textarea id="script-idea" class="pb-idea" rows="2" placeholder="例：重生回到被退婚那天，这次我要让看不起我的全家后悔"></textarea>
+                    </div>
 
-                        <div class="control-panel">
-                            <div class="control-row">
-                                <div class="control-item">
-                                    <label>🌍 模式</label>
-                                    <select id="script-mode">
-                                        <option value="domestic">海内（中文）</option>
-                                        <option value="overseas">海外（English）</option>
-                                    </select>
-                                </div>
-                                <div class="control-item" id="script-region-wrap" style="display:none;">
-                                    <label>🗺️ 出海市场</label>
-                                    <select id="script-region"></select>
-                                </div>
-                                <div class="control-item">
-                                    <label>🎭 题材</label>
-                                    <select id="script-genre"></select>
-                                </div>
-                                <div class="control-item">
-                                    <label>🎚️ 基调</label>
-                                    <select id="script-tone"></select>
-                                </div>
-                            </div>
-                            <div class="control-row">
-                                <div class="control-item">
-                                    <label>🏁 结局</label>
-                                    <select id="script-ending"></select>
-                                </div>
-                                <div class="control-item">
-                                    <label>👥 受众</label>
-                                    <select id="script-audience"></select>
-                                </div>
-                                <div class="control-item">
-                                    <label>📚 集数规模</label>
-                                    <select id="script-scale"></select>
-                                </div>
-                                <div class="control-item">
-                                    <label>✍️ 先写几集</label>
-                                    <select id="script-firstn">
-                                        <option value="1">前 1 集</option>
-                                        <option value="3" selected>前 3 集</option>
-                                        <option value="5">前 5 集</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <!-- 选项：响应式网格 -->
+                    <div class="pb-options">
+                        <div class="pb-field">
+                            <span class="pb-field-label">🌍 模式</span>
+                            <select id="script-mode" class="pb-select">
+                                <option value="domestic">海内（中文）</option>
+                                <option value="overseas">海外（English）</option>
+                            </select>
                         </div>
+                        <div class="pb-field" id="script-region-wrap" style="display:none;">
+                            <span class="pb-field-label">🗺️ 出海市场</span>
+                            <select id="script-region" class="pb-select"></select>
+                        </div>
+                        <div class="pb-field"><span class="pb-field-label">🎭 题材</span><select id="script-genre" class="pb-select"></select></div>
+                        <div class="pb-field"><span class="pb-field-label">🎚️ 基调</span><select id="script-tone" class="pb-select"></select></div>
+                        <div class="pb-field"><span class="pb-field-label">🏁 结局</span><select id="script-ending" class="pb-select"></select></div>
+                        <div class="pb-field"><span class="pb-field-label">👥 受众</span><select id="script-audience" class="pb-select"></select></div>
+                        <div class="pb-field"><span class="pb-field-label">📚 集数</span><select id="script-scale" class="pb-select"></select></div>
+                        <div class="pb-field">
+                            <span class="pb-field-label">✍️ 先写几集</span>
+                            <select id="script-firstn" class="pb-select">
+                                <option value="1">前 1 集</option>
+                                <option value="3" selected>前 3 集</option>
+                                <option value="5">前 5 集</option>
+                            </select>
+                        </div>
+                    </div>
 
-                        <div class="input-controls">
-                            <div class="input-hint">⏱️ 完整剧本生成较慢，请耐心等待 30-90 秒</div>
-                            <button class="btn-generate" id="btn-gen-script">
-                                <span class="btn-text">一键生成剧本</span>
-                                <span class="btn-icon-right">→</span>
-                            </button>
-                        </div>
+                    <!-- 动作栏 -->
+                    <div class="pb-actionbar">
+                        <div class="pb-hint">⏱️ 完整剧本约需 30-90 秒，请耐心等待</div>
+                        <button class="pb-ai-input-btn" id="btn-gen-script">
+                            <span class="pb-ai-sparkle">✨</span>
+                            <span class="btn-text">一键生成剧本</span>
+                        </button>
                     </div>
                 </div>
 

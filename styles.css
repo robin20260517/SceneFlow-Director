@@ -967,3 +967,89 @@ body {
 @media (max-width: 600px) {
     .script-doc { padding: 20px 16px 60px; max-height: none; }
 }
+
+/* ============================================
+   剧本工坊 — 玻璃质感输入（改编自 Uiverse pill input）
+   ============================================ */
+.pb-studio { max-width: 880px; margin: 0 auto; }
+
+/* 灵感输入 composer：玻璃圆角卡 */
+.pb-composer {
+    position: relative;
+    border-radius: 20px;
+    padding: 16px 18px 14px;
+    background: linear-gradient(180deg, rgba(166,125,255,0.18) 0%, rgba(122,69,255,0.12) 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 0 0 3px rgba(125,71,255,0.08), 0 8px 28px rgba(98,43,255,0.16), inset 0 0 6px rgba(255,255,255,0.10);
+    overflow: hidden;
+    isolation: isolate;
+}
+.pb-composer::before { /* gloss */
+    content: ""; position: absolute; inset: 2px; border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 45%, rgba(255,255,255,0));
+    pointer-events: none; z-index: 1;
+}
+.pb-composer::after { /* grain */
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    background-image:
+        radial-gradient(circle at bottom center, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 20%, transparent 60%),
+        radial-gradient(rgba(255,255,255,0.10) 0.8px, transparent 0.8px);
+    background-size: 100% 100%, 5px 5px;
+    opacity: 0.3; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
+}
+.pb-composer-label { position: relative; z-index: 3; display: block; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.78); margin-bottom: 8px; }
+.pb-idea {
+    position: relative; z-index: 3; width: 100%; box-sizing: border-box;
+    border: none; outline: none; background: transparent; resize: vertical;
+    min-height: 48px; color: #fff; font-size: 16px; line-height: 1.6;
+    font-family: inherit; letter-spacing: -0.1px;
+}
+.pb-idea::placeholder { color: rgba(255,255,255,0.45); }
+
+/* 选项网格 */
+.pb-options {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px 12px; margin-top: 14px;
+}
+.pb-field { display: flex; flex-direction: column; gap: 5px; }
+.pb-field-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); padding-left: 4px; }
+.pb-select {
+    appearance: none; -webkit-appearance: none;
+    width: 100%; box-sizing: border-box;
+    padding: 9px 30px 9px 12px; border-radius: 12px;
+    color: #fff; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+    background-color: rgba(122,69,255,0.10);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23c9b6ff' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 12px center;
+    border: 1px solid rgba(166,125,255,0.28);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.pb-select:hover { border-color: rgba(166,125,255,0.55); background-color: rgba(122,69,255,0.16); }
+.pb-select:focus { outline: none; border-color: #a67dff; box-shadow: 0 0 0 3px rgba(125,71,255,0.18); }
+.pb-select option { background: #1e1830; color: #fff; }
+
+/* 动作栏 */
+.pb-actionbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+.pb-hint { font-size: 12.5px; color: var(--text-muted); }
+
+/* 紫色发光按钮 */
+.pb-ai-input-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border: none; outline: none; cursor: pointer;
+    padding: 12px 24px; border-radius: 999px;
+    color: #fff; font-size: 14.5px; font-weight: 700; font-family: inherit; letter-spacing: -0.15px;
+    background: linear-gradient(180deg, #a67dff 0%, #7a45ff 45%, #5d24ff 100%);
+    box-shadow: 0 0 0 3px rgba(125,71,255,0.12), 0 6px 14px rgba(98,43,255,0.28), inset 0 2px 8px rgba(255,255,255,0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease;
+}
+.pb-ai-input-btn:hover { transform: translateY(-1px); box-shadow: 0 0 0 4px rgba(125,71,255,0.16), 0 10px 20px rgba(98,43,255,0.34), inset 0 2px 8px rgba(255,255,255,0.22); }
+.pb-ai-input-btn:active { transform: scale(0.97); }
+.pb-ai-input-btn.loading { opacity: 0.7; pointer-events: none; animation: pb-pulse 1.1s ease-in-out infinite; }
+@keyframes pb-pulse { 0%,100% { opacity: 0.7; } 50% { opacity: 0.95; } }
+.pb-ai-sparkle { font-size: 14px; transform: translateY(-0.5px); }
+
+@media (max-width: 600px) {
+    .pb-actionbar { flex-direction: column-reverse; align-items: stretch; }
+    .pb-ai-input-btn { width: 100%; }
+}
