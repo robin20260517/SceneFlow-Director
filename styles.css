@@ -232,28 +232,7 @@ body {
     box-shadow: var(--shadow-glow);
 }
 
-#scene-input {
-    width: 100%;
-    background: var(--bg-input);
-    border: none;
-    border-radius: var(--radius-md);
-    padding: 16px;
-    font-size: 16px;
-    color: var(--text-primary);
-    resize: none;
-    font-family: var(--font-display);
-    line-height: 1.6;
-    transition: var(--transition);
-}
-
-#scene-input::placeholder {
-    color: var(--text-muted);
-}
-
-#scene-input:focus {
-    outline: none;
-    background: var(--bg-primary);
-}
+/* #scene-input 旧的黑色输入框样式已移除，统一由 .pb-idea 玻璃风格接管 */
 
 /* ===== 控制面板 ===== */
 .control-panel {
@@ -986,10 +965,12 @@ body {
     position: relative;
     border-radius: 20px;
     padding: 16px 18px 14px;
-    background: linear-gradient(180deg, rgba(166,125,255,0.18) 0%, rgba(122,69,255,0.12) 100%);
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015)),
+        linear-gradient(180deg, rgba(178,140,255,0.24) 0%, rgba(130,86,255,0.15) 100%);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 0 0 3px rgba(125,71,255,0.08), 0 8px 28px rgba(98,43,255,0.16), inset 0 0 6px rgba(255,255,255,0.10);
+    box-shadow: 0 0 0 3px rgba(125,71,255,0.10), 0 8px 28px rgba(98,43,255,0.18), inset 0 1px 0 rgba(255,255,255,0.14);
     overflow: hidden;
     isolation: isolate;
 }
