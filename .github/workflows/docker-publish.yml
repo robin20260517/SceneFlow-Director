@@ -3,6 +3,12 @@ name: Publish Docker Image
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag (e.g. v0.1.0)'
+        required: false
+        default: 'latest'
 
 env:
   REGISTRY: ghcr.io
