@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="SceneFlow Director Banner" width="100%"/>
+</p>
+
 # 导演台 — AI 分镜与短剧创作工作台
 
 > 输入一句剧情描述，AI 自动拆解完整分镜方案并生成可直接投喂视频模型的提示词；配套剧本工坊一键输出短剧剧本包。
@@ -144,7 +148,17 @@ python -m http.server 8080
 
 - **Cloudflare Pages**：连接仓库，根目录部署，无需构建命令
 - **Vercel**：同上，Framework Preset 选 `Other`
-- **GitHub Pages**：Settings → Pages → 选 `master` 分支根目录
+- **GitHub Pages**：Settings → Pages → 选 `main` 分支根目录
+
+**Docker 部署**（GitHub Packages 提供镜像）：
+
+```bash
+docker pull ghcr.io/robin20260517/sceneflow-director:latest
+docker run -p 8080:80 ghcr.io/robin20260517/sceneflow-director:latest
+# 打开 http://localhost:8080
+```
+
+每次发布 Release 时 GitHub Actions 自动构建并推送新镜像到 GHCR。
 
 无需服务端，无数据库依赖。
 
