@@ -9,7 +9,7 @@
 // agent/tool 外壳吞掉正文，原生端点可直接返回文本）
 const POYO_CONFIG = {
     apiUrl: 'https://api.poyo.ai/v1/messages',
-    apiKey: 'sk-62bui1RuWLtcbquQMzZx3OEKpMBaNrLCzLidrVEKnlVk3Jy8Chex3W8zwwa0XZ',
+    get apiKey() { return localStorage.getItem('daoyantai_poyo_key') || ''; },
     model: 'claude-sonnet-4-6'
 };
 
@@ -217,6 +217,10 @@ async function _callPoyoMessages(systemPrompt, userMsg) {
 
 // === 一键生成（带重试，应对 poyo 偶发 tool_use 空返回）===
 async function generateDramaScript(idea, opts, onProgress) {
+    if (!POYO_CONFIG.apiKey) {
+        if (typeof showSettingsModal === 'function') showSettingsModal('请先设置 Poyo API Key 才能生成剧本');
+        return { success: false, error: '未配置 Poyo API Key，请点击右上角 ⚙️ 设置' };
+    }
     const systemPrompt = buildScriptSystemPrompt(opts);
     const userMsg = (opts.mode === 'overseas')
         ? `Story idea / premise:\n${idea}\n\nOutput ONLY the markdown script document. Do not call any tools.`

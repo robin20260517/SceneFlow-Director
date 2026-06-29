@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initColors();
     initExpressions();
     initAtMention();
+    initSettings();
 });
 
 // ===== 剧本工坊 =====
@@ -806,3 +807,53 @@ function getItemPreviewForAt(type, name) {
 function copyShotPrompt(btn) { copyToClipboard(btn.previousElementSibling.textContent); showToast('已复制'); }
 function copyToClipboard(text) { if (navigator.clipboard) { navigator.clipboard.writeText(text); } else { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); } }
 function showToast(msg) { let t = document.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+// ===== API Key 设置 =====
+function showSettingsModal(hint) {
+    const overlay = document.getElementById('settings-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    const hintEl = document.getElementById('settings-hint');
+    if (hintEl) hintEl.textContent = hint || '';
+    const dk = document.getElementById('input-deepseek-key');
+    const pk = document.getElementById('input-poyo-key');
+    if (dk) dk.value = localStorage.getItem('daoyantai_deepseek_key') || '';
+    if (pk) pk.value = localStorage.getItem('daoyantai_poyo_key') || '';
+}
+
+function initSettings() {
+    const overlay = document.getElementById('settings-overlay');
+    if (!overlay) return;
+
+    document.getElementById('btn-settings')?.addEventListener('click', () => showSettingsModal());
+    document.getElementById('btn-settings-close')?.addEventListener('click', () => { overlay.style.display = 'none'; });
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.style.display = 'none'; });
+
+    document.getElementById('btn-settings-save')?.addEventListener('click', () => {
+        const dk = document.getElementById('input-deepseek-key')?.value.trim();
+        const pk = document.getElementById('input-poyo-key')?.value.trim();
+        if (dk) localStorage.setItem('daoyantai_deepseek_key', dk);
+        else localStorage.removeItem('daoyantai_deepseek_key');
+        if (pk) localStorage.setItem('daoyantai_poyo_key', pk);
+        else localStorage.removeItem('daoyantai_poyo_key');
+        overlay.style.display = 'none';
+        showToast('API Key 已保存');
+    });
+
+    document.getElementById('btn-settings-clear')?.addEventListener('click', () => {
+        localStorage.removeItem('daoyantai_deepseek_key');
+        localStorage.removeItem('daoyantai_poyo_key');
+        const dk = document.getElementById('input-deepseek-key');
+        const pk = document.getElementById('input-poyo-key');
+        if (dk) dk.value = '';
+        if (pk) pk.value = '';
+        showToast('已清除 Key');
+    });
+
+    // 首次使用：两个 key 都未配置时自动弹出引导
+    const hasDeepseek = localStorage.getItem('daoyantai_deepseek_key');
+    const hasPoyo = localStorage.getItem('daoyantai_poyo_key');
+    if (!hasDeepseek && !hasPoyo) {
+        setTimeout(() => showSettingsModal('首次使用：请先配置你的 API Key，功能才能正常运行'), 800);
+    }
+}

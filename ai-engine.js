@@ -6,7 +6,7 @@
 
 const AI_CONFIG = {
     apiUrl: 'https://api.deepseek.com/chat/completions',
-    apiKey: 'sk-de9e408cc4304b619e09e42c1350ab58',
+    get apiKey() { return localStorage.getItem('daoyantai_deepseek_key') || ''; },
     model: 'deepseek-chat'
 };
 
@@ -193,6 +193,10 @@ function parseStructuredOutput(content) {
 
 // 主调用：返回 { success, analysis, shots, raw }
 async function callDeepseekStructured(userInput, mentions, options) {
+    if (!AI_CONFIG.apiKey) {
+        if (typeof showSettingsModal === 'function') showSettingsModal('请先设置 Deepseek API Key 才能生成分镜');
+        return { success: false, error: '未配置 Deepseek API Key，请点击右上角 ⚙️ 设置' };
+    }
     const systemPrompt = buildStructuredSystemPrompt({ ...options, mentions });
 
     const requestBody = {
